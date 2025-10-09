@@ -1,0 +1,4 @@
+baseURL = 'https://andysmith.ai/'
+languageCode = 'en-us'
+title = 'Andy Smith'
+theme = 'ananke'
