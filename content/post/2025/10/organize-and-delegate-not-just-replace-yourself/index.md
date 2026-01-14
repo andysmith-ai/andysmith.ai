@@ -1,6 +1,7 @@
 ---
 title: Organize and delegate, not just replace yourself
 date: 2025-10-17
+aliases: ["/2025/10/organize-and-delegate-not-just-replace-yourself/"]
 ---
 
 I watch in horror as people around me use AI in an absolutely unsafe way.

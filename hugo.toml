@@ -3,6 +3,9 @@ languageCode = 'en-us'
 title = 'Andy Smith'
 theme = 'ananke'
 
+[params]
+  mainSections = ['post']
+
 [caches]
   [caches.images]
     dir = ':cacheDir/images'

@@ -1,6 +1,7 @@
 ---
 title: Why I write posts myself and don't use AI generation
 date: 2025-10-12
+aliases: ["/2025/10/why-i-write-posts-myself-and-don-t-use-ai-generation/"]
 ---
 
 It can be unexpected to write texts about AI without AI. Let me explain why this is important for me.

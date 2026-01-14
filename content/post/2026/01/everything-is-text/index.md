@@ -1,6 +1,7 @@
 ---
 title: Everything Is Text
 date: 2026-01-14
+aliases: ["/2026/01/everything-is-text/"]
 ---
 
 Reading [Cursor's post on dynamic context discovery](https://cursor.com/blog/dynamic-context-discovery).

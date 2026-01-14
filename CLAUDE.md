@@ -13,7 +13,7 @@ All text in the repository must be written in English, regardless of what langua
 ### New Blog Post (default)
 When the user sends text without a command prefix:
 1. Translate to English if needed
-2. Create post in `content/YYYY/MM/post-slug/index.md` (user approves via edit permission)
+2. Create post in `content/post/YYYY/MM/post-slug/index.md` (user approves via edit permission)
 3. Commit, push, reply with X.com announcement
 
 If user rejects edit → they provide corrections → repeat
@@ -33,12 +33,12 @@ hugo server
 hugo --gc --minify
 
 # Create new post (creates draft by default)
-hugo new content/YYYY/MM/post-slug/index.md
+hugo new content/post/YYYY/MM/post-slug/index.md
 ```
 
 ## Content Structure
 
-Posts are organized by date: `content/YYYY/MM/post-slug/index.md`
+Posts are organized by date: `content/post/YYYY/MM/post-slug/index.md`
 
 Each post uses YAML front matter:
 ```yaml

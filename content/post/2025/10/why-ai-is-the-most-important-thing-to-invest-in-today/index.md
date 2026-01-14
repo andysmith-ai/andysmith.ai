@@ -1,6 +1,7 @@
 ---
 title: Why AI is the most important thing to invest in today
 date: 2025-10-10
+aliases: ["/2025/10/why-ai-is-the-most-important-thing-to-invest-in-today/"]
 ---
 
 Let me explain why I think AI is the most important thing I should invest my time and money in.

@@ -1,6 +1,7 @@
 ---
 title: Everything should be written
 date: 2025-10-13
+aliases: ["/2025/10/everything-should-be-written/"]
 ---
 
 I'm building a habit of writing down everything. I think this is the base of efficient work.

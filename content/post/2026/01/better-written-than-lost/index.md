@@ -1,6 +1,7 @@
 ---
 title: Better Written Than Lost
 date: 2026-01-14
+aliases: ["/2026/01/better-written-than-lost/"]
 ---
 
 Originally, I planned to write all my texts myself without using AI. But now I realize this requires considerable—actually, serious—discipline and extra time to polish my style in a non-native language. So I often simply don't find the time, and that's why I don't write on my blog. Not because I have nothing to say.

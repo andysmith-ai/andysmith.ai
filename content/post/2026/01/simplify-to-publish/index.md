@@ -1,6 +1,7 @@
 ---
 title: Done Today Beats Perfect Never
 date: 2026-01-14
+aliases: ["/2026/01/simplify-to-publish/"]
 ---
 
 So I'm simplifying the writing process to the maximum, shortening the path from forming an idea in my head to publishing it.
