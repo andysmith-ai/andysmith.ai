@@ -58,31 +58,36 @@ def main():
 
     lines = ascii_art.rstrip('\n').split('\n')
 
-    # Calculate dimensions
+    # Calculate fixed character dimensions using reference char
     temp_img = Image.new('RGB', (1, 1))
     temp_draw = ImageDraw.Draw(temp_img)
+    bbox = temp_draw.textbbox((0, 0), "█", font=font)
+    char_width = bbox[2] - bbox[0]
+    char_height = font_size * 1.2
 
-    max_width = 0
-    for line in lines:
-        bbox = temp_draw.textbbox((0, 0), line, font=font)
-        max_width = max(max_width, bbox[2] - bbox[0])
+    # Find max line length in characters
+    max_chars = max(len(line) for line in lines)
 
-    line_height = font_size * 1.2
-    img_width = int(max_width + padding * 2)
-    img_height = int(len(lines) * line_height + padding * 2)
+    img_width = int(max_chars * char_width + padding * 2)
+    img_height = int(len(lines) * char_height + padding * 2)
 
     # Create image
     img = Image.new('RGB', (img_width, img_height), bg_color)
     draw = ImageDraw.Draw(img)
 
-    # Draw centered text
-    y = padding
-    for line in lines:
-        bbox = draw.textbbox((0, 0), line, font=font)
-        line_width = bbox[2] - bbox[0]
-        x = (img_width - line_width) / 2
-        draw.text((x, y), line, font=font, fill=fg_color)
-        y += line_height
+    # Draw character by character at fixed grid positions
+    for row, line in enumerate(lines):
+        y = padding + row * char_height
+        # Center the line
+        line_width_chars = len(line)
+        start_x = padding + (max_chars - line_width_chars) * char_width / 2
+        for col, char in enumerate(line):
+            x = start_x + col * char_width
+            # Center each character within its cell
+            char_bbox = draw.textbbox((0, 0), char, font=font)
+            char_actual_width = char_bbox[2] - char_bbox[0]
+            x_offset = (char_width - char_actual_width) / 2
+            draw.text((x + x_offset, y), char, font=font, fill=fg_color)
 
     img.save(output_file)
     print(f"{output_file}: {img_width}x{img_height}", file=sys.stderr)
