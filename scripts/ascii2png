@@ -10,12 +10,14 @@
 #   -bg COLOR    Background color (default: #1a1a2e)
 #   -fg COLOR    Foreground/text color (default: #e0e0e0)
 #   -fs SIZE     Font size (default: 28)
-#   -m  MARGIN   Margin in pixels (default: 40)
+#   -m  MARGIN   Margin in pixels (default: 160)
+#   -ar RATIO    Minimum aspect ratio width:height (default: 2, meaning 2:1)
 
 bg="#1a1a2e"
 fg="#e0e0e0"
 fs=28
 margin=160
+min_ar=2
 output=""
 
 while [[ $# -gt 0 ]]; do
@@ -24,6 +26,7 @@ while [[ $# -gt 0 ]]; do
         -fg) fg="$2"; shift 2 ;;
         -fs) fs="$2"; shift 2 ;;
         -m)  margin="$2"; shift 2 ;;
+        -ar) min_ar="$2"; shift 2 ;;
         *) output="$1"; shift ;;
     esac
 done
@@ -37,3 +40,10 @@ tmp=$(mktemp)
 cat > "$tmp"
 pango-view --font="DejaVu Sans Mono $fs" --background="$bg" --foreground="$fg" --margin="$margin" -qo "$output" "$tmp"
 rm "$tmp"
+
+# Ensure minimum aspect ratio (default 2:1 for Twitter)
+read w h < <(identify -format "%w %h" "$output")
+target_w=$((h * min_ar))
+if (( target_w > w )); then
+    convert "$output" -gravity center -background "$bg" -extent "${target_w}x${h}" "$output"
+fi

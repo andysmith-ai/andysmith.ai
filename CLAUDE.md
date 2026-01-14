@@ -38,7 +38,7 @@ hugo --gc --minify
 # Create new post (creates draft by default)
 hugo new content/blog/YYYY/MM/post-slug/index.md
 
-# Generate featured image from ASCII art
+# Generate featured image from ASCII art (auto-pads to 2:1 aspect ratio)
 cat featured.txt | scripts/ascii2png featured.png
 ```
 
