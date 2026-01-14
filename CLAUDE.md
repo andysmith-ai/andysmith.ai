@@ -10,13 +10,18 @@ All text in the repository must be written in English, regardless of what langua
 
 ## Workflow
 
-When the user sends a text without additional instructions, treat it as a new blog post:
+### New Blog Post (default)
+When the user sends text without a command prefix:
 1. Translate to English if needed
-2. Create a new post in `content/YYYY/MM/post-slug/index.md` with current date
-3. Reply with an X.com announcement text including the link (https://andysmith.ai/YYYY/MM/post-slug/)
-4. Wait for user review - do not commit yet
-5. If user sends edits, update the post and send a new X.com announcement
-6. Commit only when user approves (e.g., "ok")
+2. Create post in `content/YYYY/MM/post-slug/index.md` (user approves via edit permission)
+3. Commit, push, reply with X.com announcement
+
+If user rejects edit → they provide corrections → repeat
+
+### Update Instructions (`/claude`)
+When the user starts message with `/claude`:
+1. Apply changes to CLAUDE.md (user approves via edit permission)
+2. Commit and push
 
 ## Commands
 
