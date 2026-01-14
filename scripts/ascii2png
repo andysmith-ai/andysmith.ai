@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""
+Convert ASCII art to PNG image.
+
+Usage:
+    echo "ASCII ART" | ascii2png output.png
+    echo "ASCII ART" | ascii2png -bg "#1a1a2e" -fg "#e0e0e0" output.png
+    cat art.txt | ascii2png -fs 24 output.png
+
+Options:
+    -bg COLOR    Background color (default: #1a1a2e)
+    -fg COLOR    Foreground/text color (default: #e0e0e0)
+    -fs SIZE     Font size (default: 28)
+    -p PADDING   Padding in pixels (default: 60)
+"""
+import sys
+from PIL import Image, ImageDraw, ImageFont
+
+def main():
+    args = sys.argv[1:]
+
+    bg_color = "#1a1a2e"
+    fg_color = "#e0e0e0"
+    font_size = 28
+    padding = 60
+    output_file = None
+
+    i = 0
+    while i < len(args):
+        if args[i] == "-bg" and i + 1 < len(args):
+            bg_color = args[i + 1]
+            i += 2
+        elif args[i] == "-fg" and i + 1 < len(args):
+            fg_color = args[i + 1]
+            i += 2
+        elif args[i] == "-fs" and i + 1 < len(args):
+            font_size = int(args[i + 1])
+            i += 2
+        elif args[i] == "-p" and i + 1 < len(args):
+            padding = int(args[i + 1])
+            i += 2
+        elif not args[i].startswith("-"):
+            output_file = args[i]
+            i += 1
+        else:
+            i += 1
+
+    if not output_file:
+        print("Usage: ascii2png [options] output.png", file=sys.stderr)
+        sys.exit(1)
+
+    ascii_art = sys.stdin.read()
+
+    try:
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", font_size)
+    except:
+        font = ImageFont.load_default()
+
+    lines = ascii_art.rstrip('\n').split('\n')
+
+    # Calculate dimensions
+    temp_img = Image.new('RGB', (1, 1))
+    temp_draw = ImageDraw.Draw(temp_img)
+
+    max_width = 0
+    for line in lines:
+        bbox = temp_draw.textbbox((0, 0), line, font=font)
+        max_width = max(max_width, bbox[2] - bbox[0])
+
+    line_height = font_size * 1.2
+    img_width = int(max_width + padding * 2)
+    img_height = int(len(lines) * line_height + padding * 2)
+
+    # Create image
+    img = Image.new('RGB', (img_width, img_height), bg_color)
+    draw = ImageDraw.Draw(img)
+
+    # Draw centered text
+    y = padding
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        line_width = bbox[2] - bbox[0]
+        x = (img_width - line_width) / 2
+        draw.text((x, y), line, font=font, fill=fg_color)
+        y += line_height
+
+    img.save(output_file)
+    print(f"{output_file}: {img_width}x{img_height}", file=sys.stderr)
+
+if __name__ == "__main__":
+    main()
