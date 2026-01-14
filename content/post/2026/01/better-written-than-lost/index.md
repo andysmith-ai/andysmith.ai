@@ -1,6 +1,6 @@
 ---
 title: Better Written Than Lost
-date: 2026-01-14T07:03
+date: 2026-01-14T07:03:00
 aliases: ["/2026/01/better-written-than-lost/"]
 ---
 
