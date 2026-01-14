@@ -15,7 +15,7 @@
 bg="#1a1a2e"
 fg="#e0e0e0"
 fs=28
-margin=80
+margin=160
 output=""
 
 while [[ $# -gt 0 ]]; do
