@@ -44,6 +44,7 @@ Each post uses YAML front matter:
 ```yaml
 ---
 title: Post Title
+description: Brief summary for SEO and social sharing
 date: YYYY-MM-DDTHH:MM:SS
 ---
 ```
