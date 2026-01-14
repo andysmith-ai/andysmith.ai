@@ -14,7 +14,10 @@ All text in the repository must be written in English, regardless of what langua
 When the user sends text without a command prefix:
 1. Translate to English if needed
 2. Create post in `content/blog/YYYY/MM/post-slug/index.md` (user approves via edit permission)
-3. Commit, push, reply with X.com announcement
+3. Create `featured.txt` with ASCII art and show it to user
+4. Generate `featured.png` using `scripts/ascii2png`
+5. Add `featured_image: featured.png` to front matter
+6. Commit, push, reply with X.com announcement
 
 If user rejects edit → they provide corrections → repeat
 
@@ -34,6 +37,9 @@ hugo --gc --minify
 
 # Create new post (creates draft by default)
 hugo new content/blog/YYYY/MM/post-slug/index.md
+
+# Generate featured image from ASCII art
+cat featured.txt | scripts/ascii2png featured.png
 ```
 
 ## Content Structure
