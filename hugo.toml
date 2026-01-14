@@ -5,6 +5,7 @@ theme = 'ananke'
 
 [params]
   mainSections = ['blog']
+  recent_posts_number = 10
 
 [caches]
   [caches.images]
