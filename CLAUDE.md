@@ -44,7 +44,7 @@ Each post uses YAML front matter:
 ```yaml
 ---
 title: Post Title
-date: YYYY-MM-DD
+date: YYYY-MM-DDTHH:MM
 ---
 ```
 

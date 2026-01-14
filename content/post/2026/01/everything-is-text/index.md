@@ -1,6 +1,6 @@
 ---
 title: Everything Is Text
-date: 2026-01-14
+date: 2026-01-14T07:57
 aliases: ["/2026/01/everything-is-text/"]
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Everything should be written
-date: 2025-10-13
+date: 2025-10-13T14:49
 aliases: ["/2025/10/everything-should-be-written/"]
 ---
 

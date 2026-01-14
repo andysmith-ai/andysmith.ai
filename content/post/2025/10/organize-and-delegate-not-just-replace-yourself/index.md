@@ -1,6 +1,6 @@
 ---
 title: Organize and delegate, not just replace yourself
-date: 2025-10-17
+date: 2025-10-17T18:39
 aliases: ["/2025/10/organize-and-delegate-not-just-replace-yourself/"]
 ---
 

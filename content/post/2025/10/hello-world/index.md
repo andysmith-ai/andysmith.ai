@@ -1,6 +1,6 @@
 ---
 title: Hello World
-date: 2025-10-09
+date: 2025-10-09T17:09
 aliases: ["/2025/10/hello-world/"]
 ---
 
