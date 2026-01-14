@@ -1,6 +1,8 @@
 ---
 title: Done Today Beats Perfect Never
 date: 2026-01-14T07:35:00
+featured_image: featured.png
+images: ["featured.png"]
 aliases: ["/2026/01/simplify-to-publish/"]
 ---
 

@@ -1,6 +1,8 @@
 ---
 title: Organize and delegate, not just replace yourself
 date: 2025-10-17T18:39:00
+featured_image: featured.png
+images: ["featured.png"]
 aliases: ["/2025/10/organize-and-delegate-not-just-replace-yourself/"]
 ---
 

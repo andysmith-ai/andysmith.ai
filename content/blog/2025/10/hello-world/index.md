@@ -1,6 +1,8 @@
 ---
 title: Hello World
 date: 2025-10-09T17:09:00
+featured_image: featured.png
+images: ["featured.png"]
 aliases: ["/2025/10/hello-world/"]
 ---
 

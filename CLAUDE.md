@@ -52,8 +52,24 @@ Each post uses YAML front matter:
 title: Post Title
 description: Brief summary for SEO and social sharing
 date: YYYY-MM-DDTHH:MM:SS
+featured_image: featured.png
+images: ["featured.png"]
 ---
 ```
+
+## Featured Image Requirements
+
+ASCII art in `featured.txt` should follow these rules:
+1. **One recognizable image** related to the post topic (can be abstract or stylized text)
+2. **No regular text** — only block-character art (title will be overlaid)
+3. **Large simple shapes** — readable even as thumbnail
+4. **Use block characters** — █, ▄, ▀, ▓, ▒, ░, ╔, ╗, ║, ═, etc.
+5. **Gradients welcome** — ░▒▓█ for depth and texture
+
+Good examples:
+- Stylized text: "TXT", "HI", "KISS" in block letters
+- Icons: rocket, fortress, org chart
+- Abstract shapes with gradients
 
 ## Deployment
 

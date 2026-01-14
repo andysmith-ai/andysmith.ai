@@ -1,6 +1,8 @@
 ---
 title: Why AI is the most important thing to invest in today
 date: 2025-10-10T19:58:00
+featured_image: featured.png
+images: ["featured.png"]
 aliases: ["/2025/10/why-ai-is-the-most-important-thing-to-invest-in-today/"]
 ---
 
