@@ -4,7 +4,7 @@ title = 'Andy Smith'
 theme = 'ananke'
 
 [params]
-  mainSections = ['post']
+  mainSections = ['blog']
 
 [caches]
   [caches.images]
