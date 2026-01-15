@@ -4,6 +4,7 @@ description: Why surviving a risk doesn't mean you made the right choice
 date: 2026-01-15T07:14:00
 featured_image: featured.png
 images: ["featured.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2011709763311321471"
 ---
 
 Reading "Fooled by Randomness" by Nassim Taleb.
@@ -19,3 +20,5 @@ If a risk didn't materialize this particular time, that doesn't mean it should b
 I've started noticing many people around me who don't grasp this simple and obvious idea — they "just live." I don't understand them.
 
 What scares me most is that I probably don't notice similar behavior in myself and act the same way. How to fix this?
+
+{{< x >}}
