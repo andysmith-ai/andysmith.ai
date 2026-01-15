@@ -4,6 +4,7 @@ description: "How switching to pure Claude Code forced me to abandon old habits 
 date: 2026-01-15T17:14:22
 featured_image: featured.png
 images: ["featured.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2011853509524869228"
 ---
 
 I never run code locally. It's not safe. Instead, I always use sandboxes. Once upon a time it was a remote machine with Emacs that I connected to via SSH. Then I moved to GitHub Codespaces with VS Code. Then it became a remote machine again, this time with [VS Code tunnels](https://code.visualstudio.com/docs/remote/tunnels).
@@ -25,3 +26,5 @@ Instead, I need to make Claude Code do it. And do it efficiently, without burnin
 I'm glad I figured this out, even if a bit late. Maybe later I'll return to Vim or Emacs, but I'll be calling them from Claude Code, not the other way around. Now it seems clear that Claude Code is the primary tool. I start it in the morning and don't exit until evening.
 
 Next horizons: orchestras of agents, inter-agent communication, organizations of agents with shared memory and processes. Fun times ahead.
+
+{{< x >}}
