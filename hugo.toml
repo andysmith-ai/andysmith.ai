@@ -2,7 +2,9 @@ baseURL = 'https://andysmith.ai/'
 languageCode = 'en-us'
 title = 'Andy Smith'
 theme = 'ananke'
-paginate = 30
+[pagination]
+  pagerSize = 30
+
 [params]
   mainSections = ['blog']
 
