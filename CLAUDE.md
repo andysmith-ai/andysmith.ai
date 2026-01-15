@@ -66,6 +66,7 @@ ASCII art in `featured.txt` should follow these rules:
 4. **Use block characters** — █, ▄, ▀, ▓, ▒, ░, ╔, ╗, ║, ═, etc.
 5. **Gradients welcome** — ░▒▓█ for depth and texture
 6. **Left-align to widest line** — no leading spaces on the widest line (pango-view adds margins; extra leading spaces shift the image right)
+7. **No background fill** — draw only the shape itself, don't fill empty space with ░ or other characters
 
 Good examples:
 - Stylized text: "TXT", "HI", "KISS" in block letters
