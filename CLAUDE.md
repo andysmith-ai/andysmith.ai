@@ -70,6 +70,13 @@ twitter_discussion: "https://x.com/andysmith_ai/status/..."
 
 **Date must be current datetime** — use the actual time when creating the post. Future dates prevent publication.
 
+## Tweet Text
+
+When writing tweet text in Phase 3:
+1. **One main idea** — extract the single most important takeaway from the post
+2. **Standalone clarity** — the tweet must make sense without reading the post
+3. **No summary jumble** — don't cram multiple points from the post into one tweet
+
 ## Twitter Discussion
 
 To add a "Discuss on X" link at the end of a post:
