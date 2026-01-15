@@ -4,7 +4,9 @@ title = 'Andy Smith'
 theme = 'ananke'
 [params]
   mainSections = ['blog']
-  recent_posts_number = 10
+
+[params.ananke]
+  show_recent_posts = false
 
 [caches]
   [caches.images]
