@@ -57,6 +57,8 @@ images: ["featured.png"]
 ---
 ```
 
+**Date must be current datetime** — use the actual time when creating the post. Future dates prevent publication.
+
 ## Featured Image Requirements
 
 ASCII art in `featured.txt` should follow these rules:

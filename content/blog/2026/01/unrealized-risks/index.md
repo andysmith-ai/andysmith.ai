@@ -1,7 +1,7 @@
 ---
 title: Unrealized Risks Are Still Real Costs
 description: Why surviving a risk doesn't mean you made the right choice
-date: 2026-01-15T12:00:00
+date: 2026-01-15T07:14:00
 featured_image: featured.png
 images: ["featured.png"]
 ---
