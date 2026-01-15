@@ -4,6 +4,7 @@ description: Building a personal knowledge graph by capturing and indexing every
 date: 2026-01-15T16:23:11
 featured_image: featured.png
 images: ["featured.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2011837779727286560"
 ---
 
 I want to save everything I write in Claude Code. And everything it answers. Everything it does, which tools it calls. Absolutely everything. Then I want to index this information.
@@ -15,3 +16,5 @@ I can also use this session history in future sessions. This will become my pers
 Actually, I want to digitize everything I do on my computer, save it, and analyze it all. But starting with Claude Code is easiest — it stores data in JSON, which is easy to parse and save to a unified database. I have multiple devices running Claude Code, so this might be a small but solvable problem.
 
 Once I get the key insights, I can expand the schema and connect more sources to my information collection system. Then I'll be able to create my digital twin — one that knows everything I know and uses that data to automate the routine.
+
+{{< x >}}
