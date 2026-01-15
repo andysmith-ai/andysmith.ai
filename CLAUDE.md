@@ -12,14 +12,24 @@ All text in the repository must be written in English, regardless of what langua
 
 ### New Blog Post (default)
 When the user sends text without a command prefix:
-1. Translate to English if needed
-2. Create post in `content/blog/YYYY/MM/post-slug/index.md` (user approves via edit permission)
-3. Create `featured.txt` with ASCII art and show it to user
-4. Generate `featured.png` using `scripts/ascii2png`
-5. Add `featured_image: featured.png` to front matter
-6. Commit, push, reply with X.com announcement
 
-If user rejects edit → they provide corrections → repeat
+**Phase 1: Discuss**
+1. Propose a title and image idea (do not create files yet)
+2. User approves or provides corrections → repeat until approved
+
+**Phase 2: Create**
+3. Translate text to English if needed
+4. Create post in `content/blog/YYYY/MM/post-slug/index.md`
+5. Create `featured.txt` with ASCII art, generate `featured.png`
+6. User approves or provides corrections → repeat until approved
+
+**Phase 3: Publish**
+7. Commit and push (without `twitter_discussion` link)
+8. Provide tweet text for user to post
+
+**Phase 4: Link**
+9. User publishes tweet and provides the URL
+10. Add `twitter_discussion` to front matter, add `{{</* x */>}}` shortcode, commit and push
 
 ### Update Instructions (`/claude`)
 When the user starts message with `/claude`:
@@ -54,10 +64,20 @@ description: Brief summary for SEO and social sharing
 date: YYYY-MM-DDTHH:MM:SS
 featured_image: featured.png
 images: ["featured.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/..."
 ---
 ```
 
 **Date must be current datetime** — use the actual time when creating the post. Future dates prevent publication.
+
+## Twitter Discussion
+
+To add a "Discuss on X" link at the end of a post:
+
+1. Add `twitter_discussion` URL to front matter (see above)
+2. Add `{{</* x */>}}` shortcode at the end of the post content
+
+The shortcode only renders if `twitter_discussion` is set.
 
 ## Featured Image Requirements
 
