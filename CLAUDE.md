@@ -73,6 +73,11 @@ Good examples:
 - Icons: rocket, fortress, org chart
 - Abstract shapes with gradients
 
+## Writing Style
+
+1. **Em-dashes with spaces** — always add spaces before and after em-dashes (—)
+2. **Use dashes sparingly** — overusing em-dashes is a telltale sign of AI-generated text; prefer periods and commas for natural flow
+
 ## Deployment
 
 Automatic via GitHub Actions on push to main. The workflow builds with Hugo and deploys to GitHub Pages.
