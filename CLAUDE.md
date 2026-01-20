@@ -70,7 +70,7 @@ twitter_discussion: "https://x.com/andysmith_ai/status/..."
 ---
 ```
 
-**Date must be current datetime** — use the actual time when creating the post. Future dates prevent publication.
+**Date must be current datetime** — ALWAYS run `date +"%Y-%m-%dT%H:%M:%S"` to get the actual time before creating a post. Never guess or make up the time. Future dates prevent publication.
 
 ## Tweet Text
 
