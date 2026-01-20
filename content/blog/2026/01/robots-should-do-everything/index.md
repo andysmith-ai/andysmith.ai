@@ -4,6 +4,7 @@ description: My entrepreneurial hypothesis for the coming year — building meta
 date: 2026-01-20T10:30:00
 featured_image: featured.png
 images: ["featured.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2013560917754106008"
 ---
 
 My entrepreneurial hypothesis for the coming year:
@@ -34,3 +35,5 @@ And then there are options:
 There can also be some combination of these options. For example, I build a meta-system that builds and maintains systems, some of which I sell, and some I use to maintain the system and meta-system itself.
 
 This way we get a new class of systems that can build upon themselves. That's where development should head.
+
+{{< x >}}
