@@ -3,7 +3,7 @@ title: Robots Should Do Everything
 description: My entrepreneurial hypothesis for the coming year — building meta-factories that construct and maintain robot systems
 date: 2026-01-20T10:30:00
 featured_image: featured.png
-images: ["featured.png"]
+images: ["image.png"]
 twitter_discussion: "https://x.com/andysmith_ai/status/2013560917754106008"
 ---
 
