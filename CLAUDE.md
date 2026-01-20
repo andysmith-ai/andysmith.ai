@@ -75,9 +75,10 @@ twitter_discussion: "https://x.com/andysmith_ai/status/..."
 ## Tweet Text
 
 When writing tweet text in Phase 3:
-1. **One main idea** — extract the single most important takeaway from the post
-2. **Standalone clarity** — the tweet must make sense without reading the post
-3. **No summary jumble** — don't cram multiple points from the post into one tweet
+1. **Keep the main idea** — if the user provided a tweet idea in instructions, preserve its core message
+2. **Expand to 280 chars** — fill the available space with supporting thoughts from the post
+3. **Standalone clarity** — the tweet must make sense without reading the post
+4. **No summary jumble** — expand on one idea, don't cram unrelated points
 
 ## Twitter Discussion
 
