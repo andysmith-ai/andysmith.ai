@@ -13,8 +13,10 @@ All text in the repository must be written in English, regardless of what langua
 ### New Blog Post (default)
 When the user sends text without a command prefix:
 
+**Optional instructions:** If the message ends with `---` followed by text, that text contains instructions to follow (title, image idea, tweet, etc.). Do not translate or include instructions in the post.
+
 **Phase 1: Discuss**
-1. Propose a title and image idea (do not create files yet)
+1. Propose a title and image idea (skip if provided in instructions)
 2. User approves or provides corrections → repeat until approved
 
 **Phase 2: Create**
