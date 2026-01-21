@@ -22,7 +22,7 @@ When the user sends text without a command prefix:
 **Phase 2: Create**
 3. Translate text to English if needed
 4. Create post in `content/blog/YYYY/MM/post-slug/index.md`
-5. Create `featured.txt` with ASCII art, generate `featured.png`
+5. User uploads `image.png` from another device → run `git pull`, then `convert image.png -modulate 35 featured.png`
 6. User approves or provides corrections → repeat until approved
 
 **Phase 3: Publish**
@@ -50,8 +50,8 @@ hugo --gc --minify
 # Create new post (creates draft by default)
 hugo new content/blog/YYYY/MM/post-slug/index.md
 
-# Generate featured image from ASCII art (auto-pads to 2:1 aspect ratio)
-cat featured.txt | scripts/ascii2png featured.png
+# Generate darkened featured image from user-provided image.png
+convert image.png -modulate 35 featured.png
 ```
 
 ## Content Structure
@@ -65,7 +65,7 @@ title: Post Title
 description: Brief summary for SEO and social sharing
 date: YYYY-MM-DDTHH:MM:SS
 featured_image: featured.png
-images: ["featured.png"]
+images: ["image.png"]
 twitter_discussion: "https://x.com/andysmith_ai/status/..."
 ---
 ```
@@ -89,21 +89,11 @@ To add a "Discuss on X" link at the end of a post:
 
 The shortcode only renders if `twitter_discussion` is set.
 
-## Featured Image Requirements
+## Featured Image
 
-ASCII art in `featured.txt` should follow these rules:
-1. **One recognizable image** related to the post topic (can be abstract or stylized text)
-2. **No regular text** — only block-character art (title will be overlaid)
-3. **Large simple shapes** — readable even as thumbnail
-4. **Use block characters** — █, ▄, ▀, ▓, ▒, ░, ╔, ╗, ║, ═, etc.
-5. **Gradients welcome** — ░▒▓█ for depth and texture
-6. **Left-align to widest line** — no leading spaces on the widest line (pango-view adds margins; extra leading spaces shift the image right)
-7. **No background fill** — draw only the shape itself, don't fill empty space with ░ or other characters
-
-Good examples:
-- Stylized text: "TXT", "HI", "KISS" in block letters
-- Icons: rocket, fortress, org chart
-- Abstract shapes with gradients
+User uploads `image.png` to the post folder from another device. After upload:
+1. Run `git pull` to fetch the image
+2. Run `convert image.png -modulate 35 featured.png` to create darkened version for title overlay
 
 ## Writing Style
 
