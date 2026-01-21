@@ -27,11 +27,12 @@ When the user sends text without a command prefix:
 
 **Phase 3: Publish**
 7. Commit and push (without `twitter_discussion` link)
-8. Provide tweet text for user to post
+8. Provide post link: `https://andysmith.ai/blog/YYYY/MM/post-slug/`
+9. Provide tweet text for user to post
 
 **Phase 4: Link**
-9. User publishes tweet and provides the URL
-10. Add `twitter_discussion` to front matter, add `{{</* x */>}}` shortcode, commit and push
+10. User publishes tweet and provides the URL
+11. Add `twitter_discussion` to front matter, add `{{</* x */>}}` shortcode, commit and push
 
 ### Update Instructions (`/claude`)
 When the user starts message with `/claude`:
