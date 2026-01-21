@@ -3,7 +3,7 @@ title: "From Solo Sessions to Agent Orchestras"
 description: "A framework for vertical and horizontal scaling of AI systems through maximizing inference utilization"
 date: 2026-01-21T07:37:45
 featured_image: featured.png
-images: ["featured.png"]
+images: ["image.png"]
 ---
 
 The tactic is simple. Figure out how to consume all available compute, then find ways to increase that availability.
