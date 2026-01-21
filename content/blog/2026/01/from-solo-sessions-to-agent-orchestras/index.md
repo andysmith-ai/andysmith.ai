@@ -4,6 +4,7 @@ description: "A framework for vertical and horizontal scaling of AI systems thro
 date: 2026-01-21T07:37:45
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2013891741108056253"
 ---
 
 The tactic is simple. Figure out how to consume all available compute, then find ways to increase that availability.
@@ -53,3 +54,5 @@ One thing I haven't solved: how to distribute usage between my manual work sessi
 This looks like a case for applying management and organizational planning practices to compute resources. Budget allocation. Priority queues. Reserved capacity for human override. Essentially, accounting for AI agents.
 
 Solving these problems would mean the scaling challenge is addressed. From there, it's infinite incremental improvement.
+
+{{< x >}}
