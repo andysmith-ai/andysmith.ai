@@ -58,6 +58,8 @@ convert image.png -modulate 35 featured.png
 
 Posts are organized by date: `content/blog/YYYY/MM/post-slug/index.md`
 
+**Post slug must be descriptive** — derive it from the title, using lowercase words separated by hyphens (e.g., `capsules-isolated-environments-for-ai-agents`). Never use single-word slugs.
+
 Each post uses YAML front matter:
 ```yaml
 ---
