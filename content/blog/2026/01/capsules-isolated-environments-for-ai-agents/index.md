@@ -4,7 +4,7 @@ description: "My evolution of working with AI tools and a new concept for safely
 date: 2026-01-22T10:36:04
 featured_image: featured.png
 images: ["image.png"]
-twitter_discussion: "https://x.com/andysmith_ai/status/2014290165573755311"
+twitter_discussion: "https://x.com/andysmith_ai/status/2014290861153022302"
 ---
 
 My Evolution of Working with AI Tools. The Capsule Concept.
