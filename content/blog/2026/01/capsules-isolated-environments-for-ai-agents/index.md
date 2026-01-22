@@ -4,6 +4,7 @@ description: "My evolution of working with AI tools and a new concept for safely
 date: 2026-01-22T10:36:04
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2014290165573755311"
 ---
 
 My Evolution of Working with AI Tools. The Capsule Concept.
@@ -28,3 +29,5 @@ Since we're talking about wanting to describe the entire environment, Nix/NixOS 
 The next question is agent selection. Currently I use Claude Code (and only it). But I need a command interface as an API and preferably a web interface, so I don't have to SSH into the virtual machine. In this case I'll probably look towards opencode, since it supports API out of the box, and in my view the quality of work for all open-source agents will tend towards the same value (since the code is open, successful solutions will spread to all tools, and unsuccessful ones will die out). Therefore there won't be a big difference between choosing opencode or Claude Code.
 
 The immediate plan is to develop 1-2 capsule templates for different tasks and start using them. After that, I can think about how to run multiple agents in parallel.
+
+{{< x >}}
