@@ -20,9 +20,12 @@ When the user sends text without a command prefix:
 2. User approves or provides corrections → repeat until approved
 
 **Phase 2: Create**
-3. Translate text to English if needed
+3. Translate text to English if needed. Ask clarifying questions if:
+   - Something is unclear or ambiguous in the original text
+   - You have suggestions for improving structure
+   - You notice inaccuracies or inconsistencies
 4. Create post in `content/blog/YYYY/MM/post-slug/index.md`
-5. User uploads `image.png` from another device → run `git pull`, then `convert image.png -modulate 35 featured.png`
+5. User provides Dropbox link to image → download and run `convert image.png -modulate 35 featured.png`
 6. User approves or provides corrections → repeat until approved
 
 **Phase 3: Publish**
@@ -93,9 +96,9 @@ The shortcode only renders if `twitter_discussion` is set.
 
 ## Featured Image
 
-User uploads `image.png` to the post folder from another device. After upload:
-1. Run `git pull` to fetch the image
-2. Run `convert image.png -modulate 35 featured.png` to create darkened version for title overlay
+User provides a Dropbox link to the image. Download and process:
+1. Download image: `curl -L "DROPBOX_URL&dl=1" -o image.png` (change `dl=0` to `dl=1` for direct download)
+2. Create darkened version: `convert image.png -modulate 35 featured.png`
 
 ## Writing Style
 
