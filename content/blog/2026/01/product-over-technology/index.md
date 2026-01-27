@@ -4,6 +4,7 @@ description: Why engineers who spent years building elegant systems often miss t
 date: 2026-01-27T10:43:54
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2016102098098688035"
 ---
 
 I've spent my entire life working with technology. Studying it, building it, growing it. When evaluating any project, I instinctively reach for the technology lens first. How well is the code written? Does the architecture allow for future growth? What frameworks are being used?
@@ -19,3 +20,5 @@ I think this is a very common problem among engineers who spent years working as
 It's time to take responsibility. It's time to decide that we're doing business first and building second. What matters is why we're doing this; the how is secondary. It's time to focus on the product, on markets, on economics, psychology, sociology, and other aspects of business. Formulate hypotheses and test them instead of waiting for permission from someone. What's the product concept? Who will pay money, and for what? Why would they pay for our product instead of another?
 
 Everything else? A team of AI agents will handle that.
+
+{{< x >}}
