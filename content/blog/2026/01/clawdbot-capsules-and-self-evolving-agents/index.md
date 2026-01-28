@@ -21,7 +21,7 @@ I would extract the core that absolutely everyone needs. Which I actually did. M
 
 This actually looks like a solution to my problem of agent interaction in Capsules. Instead of some unified supervisor orchestrating everything, I can let agents self-develop and interact with each other.
 
-To demonstrate how Capsules work, I could launch my own personal assistant bot (similar to Clawdbot) running on Capsules with my own vision. In my vision, the bot-assistant doesn't create other systems itself. Instead, it provides communication between the user (the botlord) and other agents. And possibly other people through their assistants.
+To demonstrate how Capsules work, I could launch my own personal assistant bot (similar to Clawdbot) running on Capsules with my own vision. In my vision, the bot-assistant doesn't create other systems itself. Instead, it provides communication between the user (the [botlord](/blog/2026/01/botlord-human-as-corporation/)) and other agents. And possibly other people through their assistants.
 
 I see the core as super minimal. Just a chat through which you can give commands for self-improvement. Through this chat, you configure the bot itself. Self-development. The goal is to get a working companion in seconds and then tune its capabilities over time, including various access interfaces.
 
