@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="My impressions of Clawdbot and why I think AI assistants need a minimal core with self-development capabilities instead of feature accumulation.">
+  <title>Clawdbot, Capsules, and Self-Evolving Agents — Andy Smith</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <h1>Clawdbot, Capsules, and Self-Evolving Agents</h1>
+  <p><a href="/">Andy Smith</a> · January 28, 2026</p>
+  <hr>
+  <article>
+    <p>Yesterday all channels were buzzing about Clawdbot. I decided to install it and give it a try.</p>
+    <p>I liked the concept. Following my thinking from <a href="/blog/2026/01/product-over-technology/">Product Over Technology</a>, I always consider the product concept and how to sell it first. The execution is not great, but that's not what matters. What matters is that it's generating hype (meaning it sells) and it works well enough.</p>
+    <p>What I fundamentally didn't like was the lack of a platform approach. No separation of important and unimportant. No core versus everything else. This led to having to think about <em>everything</em> during installation. Network configs (Tailscale), provider settings (though you could reuse what's already in <code>~/.claude/</code>), plugin sets. I have no idea which plugins to enable right now. I haven't even decided what I need this for. I want to try it quickly and move on. In some places, I noticed NIH syndrome (Not Invented Here), with vibe-coded solutions instead of existing tools.</p>
+    <p>Because of this, the whole thing looks like a super over-engineered solution tailored to one specific person (the developer), ignoring the fact that different people need different things.</p>
+    <h2>What I Would Do Differently</h2>
+    <p>I would extract the core that absolutely everyone needs. Which I actually did. My <a href="/blog/2026/01/capsules-isolated-environments-for-ai-agents/">Capsules</a> are exactly about this. Then I would let the bot grow and develop itself.</p>
+    <p>This actually looks like a solution to my problem of agent interaction in Capsules. Instead of some unified supervisor orchestrating everything, I can let agents self-develop and interact with each other.</p>
+    <p>To demonstrate how Capsules work, I could launch my own personal assistant bot (similar to Clawdbot) running on Capsules with my own vision. In my vision, the bot-assistant doesn't create other systems itself. Instead, it provides communication between the user (the <a href="/blog/2026/01/botlord-human-as-corporation/">botlord</a>) and other agents. And possibly other people through their assistants.</p>
+    <p>I see the core as super minimal. Just a chat through which you can give commands for self-improvement. Through this chat, you configure the bot itself. Self-development. The goal is to get a working companion in seconds and then tune its capabilities over time, including various access interfaces.</p>
+    <p>This resonates with my idea to use <a href="https://nixos.org/">Nix</a> for describing Capsules. In this case, the bot can literally write itself.</p>
+    <p>My hypothesis is confirmed: Clawdbot takes off because it uses standard familiar interfaces (Telegram, Discord) and adds value on top of them. The interface matters. I expanded on this in <a href="/blog/2026/01/small-steps-beat-big-leaps-familiar-interfaces-win/">Small Steps Beat Big Leaps</a>.</p>
+  </article>
+</body>
+</html>
