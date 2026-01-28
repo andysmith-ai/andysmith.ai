@@ -7,9 +7,24 @@ theme = 'ananke'
 
 [params]
   mainSections = ['blog']
+  author = "Andy Smith"
 
 [params.ananke]
   show_recent_posts = false
+
+[params.ananke.social]
+
+[params.ananke.social.follow]
+  networks = ["x-twitter", "github"]
+
+[params.ananke.social.x-twitter]
+  username = "andysmith_ai"
+  profilelink = "https://x.com/andysmith_ai"
+  rel = "me"
+
+[params.ananke.social.github]
+  username = "andysmith-ai"
+  rel = "me"
 
 [caches]
   [caches.images]
