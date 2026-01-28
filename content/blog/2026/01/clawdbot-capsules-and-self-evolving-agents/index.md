@@ -4,6 +4,7 @@ description: "My impressions of Clawdbot and why I think AI assistants need a mi
 date: 2026-01-28T08:07:08
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2016429295799849140"
 ---
 
 Yesterday all channels were buzzing about Clawdbot. I decided to install it and give it a try.
@@ -27,3 +28,5 @@ I see the core as super minimal. Just a chat through which you can give commands
 This resonates with my idea to use [Nix](https://nixos.org/) for describing Capsules. In this case, the bot can literally write itself.
 
 My hypothesis is confirmed: Clawdbot takes off because it uses standard familiar interfaces (Telegram, Discord) and adds value on top of them. The interface matters.
+
+{{< x >}}
