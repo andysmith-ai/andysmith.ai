@@ -27,6 +27,6 @@ I see the core as super minimal. Just a chat through which you can give commands
 
 This resonates with my idea to use [Nix](https://nixos.org/) for describing Capsules. In this case, the bot can literally write itself.
 
-My hypothesis is confirmed: Clawdbot takes off because it uses standard familiar interfaces (Telegram, Discord) and adds value on top of them. The interface matters.
+My hypothesis is confirmed: Clawdbot takes off because it uses standard familiar interfaces (Telegram, Discord) and adds value on top of them. The interface matters. I expanded on this in [Small Steps Beat Big Leaps](/blog/2026/01/small-steps-beat-big-leaps-familiar-interfaces-win/).
 
 {{< x >}}
