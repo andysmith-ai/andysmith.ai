@@ -4,6 +4,7 @@ description: "With AI agents, the boundary between individual and company blurs.
 date: 2026-01-27T13:36:15
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2016387438994674155"
 ---
 
 I've always tried to see myself as a company. Even as an employee, I viewed my employer as a client or partner. The problem is, I did it poorly. I only recently realized that I think in processes rather than product-outcomes, and that needs to change (see: [Product Over Technology](/blog/2026/01/product-over-technology/)). But the core idea remains: I am a single independent economic unit that joins forces with other independent units to achieve shared goals. This partnership is mutually beneficial and voluntary.
@@ -15,3 +16,5 @@ The proposal is to become a manager. Not a seagull-manager, department head, or 
 Now is the time to learn management.
 
 Though I see a challenge here. AI agents aren't people in the traditional sense. You can't punish or reward an AI agent. Classical models will need adaptation. But the core principles can probably still apply.
+
+{{< x >}}
