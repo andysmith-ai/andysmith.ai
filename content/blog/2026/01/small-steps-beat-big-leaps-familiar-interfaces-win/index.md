@@ -4,6 +4,7 @@ description: "Successful products lower the barrier to entry by building on inte
 date: 2026-01-29T15:22:10
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2016895989286658364"
 ---
 
 My hypothesis is simple. The recipe for success is to offer something simple and familiar (lowering the barrier to entry) and add value on top of it. Products that work on interfaces users already understand take off. Products that completely change how people work don't.
@@ -25,3 +26,5 @@ However, once a user takes that first step, they'll take subsequent steps with m
 This is what you should always keep in mind. Simple beats complex. And something simple is better than nothing at all (see [Done Today Beats Perfect Never](/blog/2026/01/done-today-beats-perfect-never/)).
 
 Many small steps beat one big leap.
+
+{{< x >}}
