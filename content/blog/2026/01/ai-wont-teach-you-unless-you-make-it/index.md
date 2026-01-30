@@ -4,6 +4,7 @@ description: "AI accelerates work where you're already an expert but may hinder 
 date: 2026-01-30T09:48:12
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2017174373946282247"
 ---
 
 I've been reading Anthropic's research on the [problems with AI assistance when acquiring new skills](https://www.anthropic.com/research/AI-assistance-coding-skills) ([arXiv paper](https://arxiv.org/abs/2601.20245)).
@@ -45,3 +46,5 @@ Maybe it's becoming the new normal? Maybe I'm the odd one? After all, Anthropic 
 Building AI systems to work reliably is also a skill you can learn (including experimentally), putting in effort and making mistakes. So this also needs to be done, which is exactly what I'm doing and describing in this blog.
 
 But as usual, the truth is somewhere in the middle. Both matter.
+
+{{< x >}}
