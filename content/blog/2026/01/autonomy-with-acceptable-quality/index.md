@@ -3,7 +3,7 @@ title: "The Real Metric for Autonomous AI: Quality Without Hand-Holding"
 description: "Stop watching multiple monitors. The true measure of autonomous AI systems is how many tasks they complete without your intervention."
 date: 2026-01-29T15:49:45
 featured_image: featured.png
-images: ["featured.png"]
+images: ["image.png"]
 ---
 
 The primary metric I use to evaluate my autonomous AI systems: autonomy of work with acceptable quality of result. This seems obvious from the name "autonomous," but until you articulate it explicitly, it's not.
