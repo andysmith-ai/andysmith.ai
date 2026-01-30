@@ -4,6 +4,7 @@ description: "Why keeping Claude Code sessions short and saving context to persi
 date: 2026-01-30T07:26:16
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2017139253797331241"
 ---
 
 When actively using Claude Code in manual mode, I always apply the same technique. I keep sessions as short as possible. I set a task, get the result, close the chat. If I realize I need to return to the task to clarify something, I do so via `claude -r`.
@@ -13,3 +14,5 @@ This workflow creates a need to save information between contexts. At the end of
 I recently heard the opposite recommendation: do everything in one session, never close it. The guy complained that his tokens were flying away catastrophically fast, but when I suggested keeping sessions short, he said someone had recommended doing everything in one session.
 
 In that case, the context contains not just what you need (the things you deliberately identified as important and placed in CLAUDE.md). It contains absolutely everything that was discussed, and half of it gets lost anyway. This is clearly an inefficient way to interact, which that guy discovered in his own wallet, but he refuses to believe the obvious because faith in an authority's words turned out to be stronger.
+
+{{< x >}}
