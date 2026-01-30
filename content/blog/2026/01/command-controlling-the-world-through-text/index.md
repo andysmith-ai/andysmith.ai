@@ -4,6 +4,7 @@ description: "What if your entire participation in life could be reduced to send
 date: 2026-01-10T14:12:00
 featured_image: featured.png
 images: ["image.png"]
+twitter_discussion: "https://x.com/andysmith_ai/status/2017095142927196406"
 ---
 
 Command — controlling the "world" through text.
@@ -19,3 +20,5 @@ I draw conclusions (perhaps my command contains errors, inaccuracies, or contrad
 So my participation in this game called life comes down to sending commands. Is this the most efficient way? Can I reduce everything to this model, or is it too simplified?
 
 Can Claude Code serve as such a commander?
+
+{{< x >}}
