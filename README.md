@@ -55,3 +55,32 @@ plain text at build time since this site publishes the blog only.
 `old/` holds the original repos (both `content` mirrors, Astro site, Hugo site,
 deployed github.io) for reference and is not part of the build.
 
+## Announcement publishing
+
+New posts may include channel-specific announcement text:
+
+```yaml
+announcements:
+  telegram: "Telegram-specific announcement."
+  bluesky: "Bluesky-specific announcement."
+```
+
+`.github/workflows/reconcile-announcements.yml` publishes eligible posts
+oldest-first. Telegram receives a bold title, its announcement, and the
+canonical URL with link previews disabled. Bluesky receives its announcement as
+a root post and the canonical URL as a URL-only self-reply without an external
+card.
+
+Each Channel stores its result beside `index.md` in `telegram.json` or
+`bluesky.json`. Existing posts without `announcements` are ignored. Failed or
+partial receipts are retried when another post triggers the workflow or when the
+workflow is dispatched manually.
+
+Repository configuration:
+
+- Secret `TELEGRAM_BOT_TOKEN`
+- Variables `TELEGRAM_CHAT_ID` and `TELEGRAM_CHANNEL_USERNAME`
+- Secret `BLUESKY_APP_PASSWORD`
+- Variable `BLUESKY_IDENTIFIER`
+- Optional variable `BLUESKY_SERVICE_URL` (defaults to `https://bsky.social`)
+

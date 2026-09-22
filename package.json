@@ -8,7 +8,11 @@
     "serve": "eleventy --serve",
     "clean": "rm -rf _site",
     "deploy": "npm run build && wrangler deploy",
-    "preview": "npm run build && wrangler dev"
+    "preview": "npm run build && wrangler dev",
+    "test": "node --test scripts/*.test.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",
