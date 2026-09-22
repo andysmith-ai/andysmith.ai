@@ -192,7 +192,7 @@ class BlueskyClient {
   constructor({ identifier, appPassword, serviceUrl = "https://bsky.social", fetchImpl = fetch }) {
     this.identifier = identifier;
     this.appPassword = appPassword;
-    this.serviceUrl = serviceUrl.replace(/\/+$/, "");
+    this.serviceUrl = (serviceUrl || "https://bsky.social").replace(/\/+$/, "");
     this.fetch = fetchImpl;
     this.session = null;
   }

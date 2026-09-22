@@ -51,11 +51,14 @@ test("Telegram sends a simple announcement without a preview card", async () => 
 
 test("Bluesky publishes an announcement root and a URL-only self-reply", async () => {
   const records = [];
+  const requestUrls = [];
   let recordNumber = 0;
   const client = new BlueskyClient({
     identifier: "author.example",
     appPassword: "app-password",
+    serviceUrl: "",
     fetchImpl: async (url, init) => {
+      requestUrls.push(url);
       if (url.endsWith("com.atproto.server.createSession")) {
         return jsonResponse({ accessJwt: "jwt", did: "did:plc:author", handle: "author.example" });
       }
@@ -72,6 +75,7 @@ test("Bluesky publishes an announcement root and a URL-only self-reply", async (
   const root = await client.publishRoot(post);
   const link = await client.publishLink(post, root);
 
+  assert.ok(requestUrls.every((url) => url.startsWith("https://bsky.social/")));
   assert.equal(records[0].text, "Bluesky announcement.");
   assert.equal(records[0].embed, undefined);
   assert.equal(records[1].text, post.url);
