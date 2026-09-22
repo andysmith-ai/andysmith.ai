@@ -1,9 +1,14 @@
 {
-  "status": "partial",
+  "status": "published",
+  "published_at": "2026-09-22T18:42:31.896Z",
   "root": {
     "uri": "at://did:plc:zn65gh5rul6g53vapd5li5kr/app.bsky.feed.post/3mw4uxede7h25",
     "cid": "bafyreicdpjfo4iwg6xl5vxjalmsqvth27pgjdq54wpin7su7yl52d6wsya",
     "url": "https://bsky.app/profile/andysmith.ai/post/3mw4uxede7h25"
   },
-  "updated_at": "2026-09-22T18:42:30.691Z"
+  "link": {
+    "uri": "at://did:plc:zn65gh5rul6g53vapd5li5kr/app.bsky.feed.post/3mw4uxfi53m2u",
+    "cid": "bafyreigk57ylgidmkk2t244zxl3n6xr4zvubhguf4ergmlfdalj3qq3vu4",
+    "url": "https://bsky.app/profile/andysmith.ai/post/3mw4uxfi53m2u"
+  }
 }
