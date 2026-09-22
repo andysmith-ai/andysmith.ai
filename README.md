@@ -55,3 +55,87 @@ plain text at build time since this site publishes the blog only.
 `old/` holds the original repos (both `content` mirrors, Astro site, Hugo site,
 deployed github.io) for reference and is not part of the build.
 
+## Announcement publishing
+
+New posts may include channel-specific announcement text:
+
+```yaml
+announcements:
+  telegram: "Telegram-specific announcement."
+  bluesky: "Bluesky-specific announcement."
+```
+
+`.github/workflows/reconcile-announcements.yml` publishes eligible posts
+oldest-first. Telegram receives a bold title, its announcement, and the
+canonical URL with link previews disabled. Bluesky receives its announcement as
+a root post and the canonical URL as a URL-only self-reply without an external
+card.
+
+Each Channel stores its result beside `index.md` in `telegram.json` or
+`bluesky.json`. Existing posts without `announcements` are ignored. Failed or
+partial receipts are retried when another post triggers the workflow or when the
+workflow is dispatched manually.
+
+### Configure GitHub Actions
+
+Open **Repository Settings → Secrets and variables → Actions**. Add values at
+the repository level; no deployment environment is required.
+
+Secrets:
+
+| Name | Value |
+| --- | --- |
+| `TELEGRAM_BOT_TOKEN` | Token issued by Telegram's `@BotFather`. |
+| `BLUESKY_APP_PASSWORD` | A dedicated Bluesky app password. Never use the account's primary password. |
+
+Variables:
+
+| Name | Value |
+| --- | --- |
+| `TELEGRAM_CHAT_ID` | The target public channel username with `@`, for example `@channel_name`, or its numeric chat ID. |
+| `TELEGRAM_CHANNEL_USERNAME` | The target public channel username used to construct receipt URLs, for example `channel_name`. |
+| `BLUESKY_IDENTIFIER` | The publishing account's handle, for example `name.bsky.social`. |
+| `BLUESKY_SERVICE_URL` | Optional Personal Data Server URL. Omit it to use `https://bsky.social`. |
+
+`GITHUB_TOKEN` is supplied automatically by GitHub Actions. Do not create a
+repository secret with that name. Under **Repository Settings → Actions →
+General → Workflow permissions**, allow the workflow to write repository
+contents; it commits Channel Receipt files beside each Post.
+
+### Configure Telegram
+
+1. Open Telegram's verified `@BotFather` account.
+2. Run `/newbot`, complete the prompts, and copy the issued token into the
+   `TELEGRAM_BOT_TOKEN` repository secret.
+3. Add the bot to the target public channel as an administrator with permission
+   to post messages.
+4. Set `TELEGRAM_CHAT_ID` and `TELEGRAM_CHANNEL_USERNAME` as described above.
+
+The channel must have a public username because successful Telegram receipts
+store a public `https://t.me/<username>/<message-id>` URL.
+
+### Configure Bluesky
+
+1. Sign in to the publishing Bluesky account.
+2. Open **Settings → Advanced → App Passwords**.
+3. Create a dedicated app password named for this site and copy it immediately
+   into the `BLUESKY_APP_PASSWORD` repository secret.
+4. Put the account handle in the `BLUESKY_IDENTIFIER` repository variable.
+5. Leave `BLUESKY_SERVICE_URL` unset for the default Bluesky service. Set it
+   only when the account uses another Personal Data Server.
+
+### Verify announcement publishing
+
+Open **Actions → Reconcile announcements → Run workflow**. The workflow should
+finish successfully. For an eligible Post, verify:
+
+1. Telegram contains the title, Telegram Announcement, and canonical URL with
+   no link preview.
+2. Bluesky contains the Bluesky Announcement as the root post and a URL-only
+   self-reply.
+3. The Post directory contains `telegram.json` and `bluesky.json` receipts on
+   `main`.
+
+The workflow processes every eligible unreceipted Post, not just the newest
+one. Configure both Channels before the first manual run.
+

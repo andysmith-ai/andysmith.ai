@@ -1,0 +1,40 @@
+name: Reconcile announcements
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**/index.md"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: announcement-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Reconcile Telegram and Bluesky
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_BASE_URL: https://andysmith.ai
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHANNEL_USERNAME: ${{ vars.TELEGRAM_CHANNEL_USERNAME }}
+          BLUESKY_IDENTIFIER: ${{ vars.BLUESKY_IDENTIFIER }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          BLUESKY_SERVICE_URL: ${{ vars.BLUESKY_SERVICE_URL }}
+        run: node scripts/reconcile-announcements.mjs
