@@ -8,6 +8,7 @@ const API_VERSION = "2022-11-28";
 const USER_AGENT = "andysmith-ai-announcement-reconciler";
 const BLUESKY_MAX_CODE_POINTS = 300;
 const BLUESKY_THUMB_MAX_BYTES = 1_000_000;
+const BLUESKY_IMAGE_MAX_BYTES = 2_000_000;
 const LINK_ARROW = "→";
 const EXTERNAL_FETCH_TIMEOUT_MS = 15_000;
 
@@ -75,6 +76,16 @@ function metaContent(html, key) {
   return "";
 }
 
+function firstImage(body, baseUrl) {
+  const match = /!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?[^)]*\)|<img\b[^>]*>/i.exec(body);
+  if (!match) return undefined;
+  const [tag, markdownAlt, markdownSrc] = match;
+  const src = markdownSrc ?? /\bsrc\s*=\s*["']([^"']+)["']/i.exec(tag)?.[1];
+  if (!src) return undefined;
+  const alt = markdownAlt ?? decodeEntities(/\balt\s*=\s*["']([^"']*)["']/i.exec(tag)?.[1] ?? "");
+  return { url: new URL(src, baseUrl).href, alt: alt.trim() };
+}
+
 async function postPaths(root) {
   const found = [];
   async function visit(directory) {
@@ -93,19 +104,23 @@ async function postPaths(root) {
 
 async function loadPost(root, relativePath, siteBaseUrl) {
   const source = await readFile(path.join(root, relativePath), "utf8");
-  const { data } = parseFrontmatter(source);
+  const { data, body } = parseFrontmatter(source);
   const announcements = data.announcements;
   if (!announcements || typeof announcements !== "object") return null;
   const title = typeof data.title === "string" ? data.title.trim() : "";
   if (!title) throw new Error(`${relativePath}: title is required`);
   const date = new Date(data.date);
   if (Number.isNaN(date.getTime())) throw new Error(`${relativePath}: valid date is required`);
+  const url = publicPostUrl(relativePath, siteBaseUrl);
+  const link = typeof data.link === "string" && data.link.trim() ? data.link.trim() : undefined;
   return {
     path: relativePath,
     title,
     date,
-    url: publicPostUrl(relativePath, siteBaseUrl),
-    link: typeof data.link === "string" && data.link.trim() ? data.link.trim() : undefined,
+    url,
+    link,
+    // A link post's single preview slot belongs to its external link.
+    image: link ? undefined : firstImage(body, url),
     announcements: {
       telegram: typeof announcements.telegram === "string" ? announcements.telegram.trim() : "",
       bluesky: typeof announcements.bluesky === "string" ? announcements.bluesky.trim() : "",
@@ -200,7 +215,11 @@ class TelegramClient {
         text,
         parse_mode: "HTML",
         disable_notification: true,
-        link_preview_options: post.link ? { url: post.link, show_above_text: true } : { is_disabled: true },
+        link_preview_options: post.link
+          ? { url: post.link, show_above_text: true }
+          : post.image
+            ? { url: post.image.url, prefer_large_media: true, show_above_text: false }
+            : { is_disabled: true },
       }),
     });
     const payload = await response.json().catch(() => null);
@@ -279,10 +298,22 @@ class BlueskyClient {
         index: { byteStart, byteEnd: byteStart + encoder.encode(LINK_ARROW).byteLength },
         features: [{ $type: "app.bsky.richtext.facet#link", uri: post.url }],
       }],
-      ...(post.link ? { embed: await this.externalCard(post) } : {}),
+      ...await this.embed(post),
       langs: ["en"],
       createdAt: new Date().toISOString(),
     });
+  }
+
+  async embed(post) {
+    if (post.link) return { embed: await this.externalCard(post) };
+    if (!post.image) return {};
+    try {
+      const blob = await this.uploadImage(post.image.url, BLUESKY_IMAGE_MAX_BYTES);
+      return { embed: { $type: "app.bsky.embed.images", images: [{ image: blob, alt: post.image.alt }] } };
+    } catch (error) {
+      console.warn(`Bluesky: image ${post.image.url} is skipped: ${sanitizedError(error)}`);
+      return {};
+    }
   }
 
   async externalCard(post) {
@@ -299,23 +330,23 @@ class BlueskyClient {
       external.title = metaContent(html, "og:title") || pageTitle || post.title;
       external.description = metaContent(html, "og:description") || metaContent(html, "description");
       const image = metaContent(html, "og:image");
-      if (image) external.thumb = await this.uploadThumb(new URL(image, post.link).href);
+      if (image) external.thumb = await this.uploadImage(new URL(image, post.link).href, BLUESKY_THUMB_MAX_BYTES);
     } catch (error) {
       console.warn(`Bluesky: link card metadata for ${post.link} is incomplete: ${sanitizedError(error)}`);
     }
     return { $type: "app.bsky.embed.external", external };
   }
 
-  async uploadThumb(imageUrl) {
+  async uploadImage(imageUrl, maxBytes) {
     const response = await this.fetch(imageUrl, {
       headers: { "User-Agent": USER_AGENT },
       signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
     });
-    if (!response.ok) throw new Error(`thumbnail HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`image HTTP ${response.status}`);
     const type = (response.headers.get("content-type") || "").split(";", 1)[0].trim();
-    if (!type.startsWith("image/")) throw new Error(`thumbnail is not an image: ${type || "missing type"}`);
+    if (!type.startsWith("image/")) throw new Error(`not an image: ${type || "missing type"}`);
     const bytes = new Uint8Array(await response.arrayBuffer());
-    if (bytes.byteLength > BLUESKY_THUMB_MAX_BYTES) throw new Error(`thumbnail exceeds ${BLUESKY_THUMB_MAX_BYTES} bytes`);
+    if (bytes.byteLength > maxBytes) throw new Error(`image exceeds ${maxBytes} bytes`);
     const session = await this.authenticate();
     const upload = await this.fetch(`${this.serviceUrl}/xrpc/com.atproto.repo.uploadBlob`, {
       method: "POST",
@@ -323,7 +354,7 @@ class BlueskyClient {
       body: bytes,
     });
     const payload = await upload.json().catch(() => null);
-    if (!upload.ok || !payload?.blob) throw new Error(`thumbnail upload failed: HTTP ${upload.status}`);
+    if (!upload.ok || !payload?.blob) throw new Error(`image upload failed: HTTP ${upload.status}`);
     return payload.blob;
   }
 }

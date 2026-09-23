@@ -22,6 +22,7 @@ const post = {
 };
 
 const linkPost = { ...post, link: "https://github.com/coldteadotai/pr-lens" };
+const imagePost = { ...post, image: { url: "https://files.andysmith.ai/img/a/photo.webp", alt: "photo" } };
 
 function jsonResponse(value, status = 200) {
   return Response.json(value, { status });
@@ -94,6 +95,20 @@ test("Telegram shows a link post's external preview above the text instead of a 
   assert.deepEqual(request.payload.link_preview_options, { url: linkPost.link, show_above_text: true });
 });
 
+test("Telegram shows a regular post's image as a large preview below the text", async () => {
+  const { client, requests } = telegramHarness();
+
+  await client.publish(imagePost);
+
+  const [request] = requests;
+  assert.match(request.payload.text, /^<b>Example &lt;Post&gt;<\/b>/);
+  assert.deepEqual(request.payload.link_preview_options, {
+    url: imagePost.image.url,
+    prefer_large_media: true,
+    show_above_text: false,
+  });
+});
+
 test("Bluesky publishes one post whose trailing arrow links to the site post", async () => {
   const { client, records, requestUrls } = blueskyHarness();
   const quoted = { ...post, announcements: { ...post.announcements, bluesky: "Bluesky “announcement”." } };
@@ -161,6 +176,31 @@ test("Bluesky still publishes a link post when the linked page is unavailable", 
 
   assert.equal(records.length, 1);
   assert.deepEqual(records[0].embed.external, { uri: linkPost.link, title: post.title, description: "" });
+});
+
+test("Bluesky attaches a regular post's image with its alt text", async () => {
+  const { client, records, uploads } = blueskyHarness({
+    [imagePost.image.url]: () => new Response(Uint8Array.from([1, 2]), { headers: { "content-type": "image/webp" } }),
+  });
+
+  await client.publish(imagePost);
+
+  assert.deepEqual(uploads, [{ mimeType: "image/webp", size: 2 }]);
+  assert.deepEqual(records[0].embed, {
+    $type: "app.bsky.embed.images",
+    images: [{ image: { $type: "blob", ref: { $link: "thumb-cid" }, mimeType: "image/webp", size: 2 }, alt: "photo" }],
+  });
+});
+
+test("Bluesky publishes without the image when it cannot be uploaded", async () => {
+  const { client, records } = blueskyHarness({
+    [imagePost.image.url]: () => new Response(new Uint8Array(2_000_001), { headers: { "content-type": "image/webp" } }),
+  });
+
+  await client.publish(imagePost);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].embed, undefined);
 });
 
 test("a Telegram failure is persisted instead of escaping the reconciler", async () => {
@@ -240,4 +280,65 @@ test("reconciliation publishes only posts with announcement fields", async (t) =
     ["src/2026/Sep/22/example/telegram.json", "published"],
     ["src/2026/Sep/22/example/bluesky.json", "published"],
   ]);
+});
+
+test("reconciliation previews a post's first image but gives link posts their link instead", async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "announcement-reconciler-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const write = async (directory, frontmatter, body) => {
+    await mkdir(path.join(root, directory), { recursive: true });
+    await writeFile(path.join(root, directory, "index.md"), ["---", ...frontmatter, "announcements:",
+      '  telegram: "Announcement."', '  bluesky: "Announcement."', "---", "", body, ""].join("\n"));
+  };
+  await write("src/2026/Sep/22/photo", ['title: "Photo"', "date: 2026-09-22T12:00:00Z"],
+    '<a class="lightbox" href="https://files.andysmith.ai/img/a/photo.png"><img src="photo.webp" alt="A &amp; B"></a>\n\nText.');
+  await write("src/2026/Sep/23/linked", ['title: "Linked"', "type: link", "link: https://example.com/project", "date: 2026-09-23T12:00:00Z"],
+    "![shot](https://files.andysmith.ai/img/b/shot.png)\n\nComment.");
+
+  const telegramPayloads = [];
+  const blueskyRecords = [];
+  const requestedUrls = [];
+  const fetchImpl = async (url, init = {}) => {
+    requestedUrls.push(url);
+    if (url.includes("api.telegram.org")) {
+      telegramPayloads.push(JSON.parse(init.body));
+      return jsonResponse({ ok: true, result: { message_id: 7 } });
+    }
+    if (url.endsWith("com.atproto.server.createSession")) {
+      return jsonResponse({ accessJwt: "jwt", did: "did:plc:author", handle: "author.example" });
+    }
+    if (url.endsWith("com.atproto.repo.uploadBlob")) return jsonResponse({ blob: { $type: "blob" } });
+    if (url.endsWith("com.atproto.repo.createRecord")) {
+      blueskyRecords.push(JSON.parse(init.body).record);
+      return jsonResponse({ uri: "at://did:plc:author/app.bsky.feed.post/1", cid: "cid-1" });
+    }
+    if (url === "https://andysmith.ai/2026/Sep/22/photo/photo.webp") {
+      return new Response(Uint8Array.from([1]), { headers: { "content-type": "image/webp" } });
+    }
+    if (url === "https://example.com/project") return new Response("unavailable", { status: 503 });
+    throw new Error(`unexpected request: ${url}`);
+  };
+
+  const result = await reconcile({
+    root,
+    store: { async save() {} },
+    fetchImpl,
+    env: {
+      SITE_BASE_URL: "https://andysmith.ai",
+      TELEGRAM_BOT_TOKEN: "token",
+      TELEGRAM_CHAT_ID: "@andysmith_ai",
+      TELEGRAM_CHANNEL_USERNAME: "andysmith_ai",
+      BLUESKY_IDENTIFIER: "author.example",
+      BLUESKY_APP_PASSWORD: "password",
+    },
+  });
+
+  assert.deepEqual(result, { failed: false, candidates: 2 });
+  assert.deepEqual(telegramPayloads.map((payload) => payload.link_preview_options), [
+    { url: "https://andysmith.ai/2026/Sep/22/photo/photo.webp", prefer_large_media: true, show_above_text: false },
+    { url: "https://example.com/project", show_above_text: true },
+  ]);
+  assert.equal(blueskyRecords[0].embed.images[0].alt, "A & B");
+  assert.equal(blueskyRecords[1].embed.$type, "app.bsky.embed.external");
+  assert.ok(!requestedUrls.includes("https://files.andysmith.ai/img/b/shot.png"));
 });
