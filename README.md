@@ -66,14 +66,25 @@ announcements:
 ```
 
 `.github/workflows/reconcile-announcements.yml` publishes eligible posts
-oldest-first. Telegram receives a bold title, its announcement, and the
-canonical URL with link previews disabled. Bluesky receives its announcement as
-a root post and the canonical URL as a URL-only self-reply without an external
-card.
+oldest-first:
+
+- Telegram, regular post: bold title, announcement, and the canonical URL. If
+  the post contains an image, the first one is shown as a large link preview
+  below the text; otherwise link previews are disabled.
+- Telegram, link post (`link` in frontmatter): the external link preview above
+  the text, the announcement, and the canonical URL. No title and no post image.
+- Bluesky: one post containing the announcement followed by `→`; the arrow
+  links to the canonical URL, so the announcement plus ` →` must fit in 300
+  characters. A regular post attaches its first image (up to 2,000,000 bytes,
+  with its alt text); if the image cannot be uploaded the post goes out without
+  it. A link post instead carries an external link card for `link`, built from
+  the linked page's `og:title`, `og:description`, and `og:image` (thumbnail up
+  to 1,000,000 bytes). If the page is unavailable the card falls back to the
+  post title without a thumbnail.
 
 Each Channel stores its result beside `index.md` in `telegram.json` or
-`bluesky.json`. Existing posts without `announcements` are ignored. Failed or
-partial receipts are retried when another post triggers the workflow or when the
+`bluesky.json`. Existing posts without `announcements` are ignored. Failed
+receipts are retried when another post triggers the workflow or when the
 workflow is dispatched manually.
 
 ### Configure GitHub Actions

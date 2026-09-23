@@ -5,6 +5,12 @@ import YAML from "yaml";
 
 const POST_PATH = /^src\/(\d{4})\/([A-Z][a-z]{2})\/(\d{1,2})\/([^/]+)\/index\.md$/;
 const API_VERSION = "2022-11-28";
+const USER_AGENT = "andysmith-ai-announcement-reconciler";
+const BLUESKY_MAX_CODE_POINTS = 300;
+const BLUESKY_THUMB_MAX_BYTES = 1_000_000;
+const BLUESKY_IMAGE_MAX_BYTES = 2_000_000;
+const LINK_ARROW = "→";
+const EXTERNAL_FETCH_TIMEOUT_MS = 15_000;
 
 function parseFrontmatter(source) {
   const match = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(source.replace(/\r\n?/g, "\n"));
@@ -47,6 +53,39 @@ function sanitizedError(error) {
   return message.replace(/[\r\n]+/g, " ").slice(0, 500);
 }
 
+function decodeEntities(value) {
+  return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, decimal) => String.fromCodePoint(Number(decimal)))
+    .replaceAll("&quot;", '"')
+    .replaceAll("&apos;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+}
+
+function metaContent(html, key) {
+  for (const [tag] of html.matchAll(/<meta\b[^>]*>/gi)) {
+    const attributes = Object.fromEntries(
+      Array.from(tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g), (match) => [match[1].toLowerCase(), match[2] ?? match[3]]),
+    );
+    if ((attributes.property ?? attributes.name)?.toLowerCase() !== key) continue;
+    const content = decodeEntities(attributes.content ?? "").trim();
+    if (content) return content;
+  }
+  return "";
+}
+
+function firstImage(body, baseUrl) {
+  const match = /!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?[^)]*\)|<img\b[^>]*>/i.exec(body);
+  if (!match) return undefined;
+  const [tag, markdownAlt, markdownSrc] = match;
+  const src = markdownSrc ?? /\bsrc\s*=\s*["']([^"']+)["']/i.exec(tag)?.[1];
+  if (!src) return undefined;
+  const alt = markdownAlt ?? decodeEntities(/\balt\s*=\s*["']([^"']*)["']/i.exec(tag)?.[1] ?? "");
+  return { url: new URL(src, baseUrl).href, alt: alt.trim() };
+}
+
 async function postPaths(root) {
   const found = [];
   async function visit(directory) {
@@ -65,18 +104,23 @@ async function postPaths(root) {
 
 async function loadPost(root, relativePath, siteBaseUrl) {
   const source = await readFile(path.join(root, relativePath), "utf8");
-  const { data } = parseFrontmatter(source);
+  const { data, body } = parseFrontmatter(source);
   const announcements = data.announcements;
   if (!announcements || typeof announcements !== "object") return null;
   const title = typeof data.title === "string" ? data.title.trim() : "";
   if (!title) throw new Error(`${relativePath}: title is required`);
   const date = new Date(data.date);
   if (Number.isNaN(date.getTime())) throw new Error(`${relativePath}: valid date is required`);
+  const url = publicPostUrl(relativePath, siteBaseUrl);
+  const link = typeof data.link === "string" && data.link.trim() ? data.link.trim() : undefined;
   return {
     path: relativePath,
     title,
     date,
-    url: publicPostUrl(relativePath, siteBaseUrl),
+    url,
+    link,
+    // A link post's single preview slot belongs to its external link.
+    image: link ? undefined : firstImage(body, url),
     announcements: {
       telegram: typeof announcements.telegram === "string" ? announcements.telegram.trim() : "",
       bluesky: typeof announcements.bluesky === "string" ? announcements.bluesky.trim() : "",
@@ -109,7 +153,7 @@ class GitHubReceiptStore {
         Authorization: `Bearer ${this.token}`,
         Accept: "application/vnd.github+json",
         "Content-Type": "application/json",
-        "User-Agent": "andysmith-ai-announcement-reconciler",
+        "User-Agent": USER_AGENT,
         "X-GitHub-Api-Version": API_VERSION,
         ...init.headers,
       },
@@ -161,7 +205,8 @@ class TelegramClient {
 
   async publish(post) {
     if (!post.announcements.telegram) throw new Error("Telegram announcement is missing");
-    const text = `<b>${htmlEscape(post.title)}</b>\n\n${htmlEscape(post.announcements.telegram)}\n\n${htmlEscape(post.url)}`;
+    const body = `${htmlEscape(post.announcements.telegram)}\n\n${htmlEscape(post.url)}`;
+    const text = post.link ? body : `<b>${htmlEscape(post.title)}</b>\n\n${body}`;
     const response = await this.fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -170,7 +215,11 @@ class TelegramClient {
         text,
         parse_mode: "HTML",
         disable_notification: true,
-        link_preview_options: { is_disabled: true },
+        link_preview_options: post.link
+          ? { url: post.link, show_above_text: true }
+          : post.image
+            ? { url: post.image.url, prefer_large_media: true, show_above_text: false }
+            : { is_disabled: true },
       }),
     });
     const payload = await response.json().catch(() => null);
@@ -233,28 +282,80 @@ class BlueskyClient {
     return { uri: payload.uri, cid: payload.cid, url: publicBlueskyUrl(session.handle, payload.uri) };
   }
 
-  async publishRoot(post) {
-    const text = post.announcements.bluesky;
-    if (!text) throw new Error("Bluesky announcement is missing");
-    if (codePointLength(text) > 300) throw new Error("Bluesky announcement exceeds 300 code points");
-    return this.createRecord({ text, langs: ["en"], createdAt: new Date().toISOString() });
-  }
-
-  async publishLink(post, root) {
-    const bytes = new TextEncoder().encode(post.url);
+  async publish(post) {
+    const announcement = post.announcements.bluesky;
+    if (!announcement) throw new Error("Bluesky announcement is missing");
+    const prefix = `${announcement} `;
+    const text = `${prefix}${LINK_ARROW}`;
+    if (codePointLength(text) > BLUESKY_MAX_CODE_POINTS) {
+      throw new Error(`Bluesky announcement with its link arrow exceeds ${BLUESKY_MAX_CODE_POINTS} code points`);
+    }
+    const encoder = new TextEncoder();
+    const byteStart = encoder.encode(prefix).byteLength;
     return this.createRecord({
-      text: post.url,
+      text,
       facets: [{
-        index: { byteStart: 0, byteEnd: bytes.byteLength },
+        index: { byteStart, byteEnd: byteStart + encoder.encode(LINK_ARROW).byteLength },
         features: [{ $type: "app.bsky.richtext.facet#link", uri: post.url }],
       }],
-      reply: {
-        root: { uri: root.uri, cid: root.cid },
-        parent: { uri: root.uri, cid: root.cid },
-      },
+      ...await this.embed(post),
       langs: ["en"],
       createdAt: new Date().toISOString(),
     });
+  }
+
+  async embed(post) {
+    if (post.link) return { embed: await this.externalCard(post) };
+    if (!post.image) return {};
+    try {
+      const blob = await this.uploadImage(post.image.url, BLUESKY_IMAGE_MAX_BYTES);
+      return { embed: { $type: "app.bsky.embed.images", images: [{ image: blob, alt: post.image.alt }] } };
+    } catch (error) {
+      console.warn(`Bluesky: image ${post.image.url} is skipped: ${sanitizedError(error)}`);
+      return {};
+    }
+  }
+
+  async externalCard(post) {
+    const external = { uri: post.link, title: post.title, description: "" };
+    try {
+      const response = await this.fetch(post.link, {
+        headers: { Accept: "text/html", "User-Agent": USER_AGENT },
+        signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!(response.headers.get("content-type") || "").includes("html")) throw new Error("not an HTML page");
+      const html = await response.text();
+      const pageTitle = decodeEntities(/<title[^>]*>([^<]*)<\/title>/i.exec(html)?.[1] ?? "").trim();
+      external.title = metaContent(html, "og:title") || pageTitle || post.title;
+      external.description = metaContent(html, "og:description") || metaContent(html, "description");
+      const image = metaContent(html, "og:image");
+      if (image) external.thumb = await this.uploadImage(new URL(image, post.link).href, BLUESKY_THUMB_MAX_BYTES);
+    } catch (error) {
+      console.warn(`Bluesky: link card metadata for ${post.link} is incomplete: ${sanitizedError(error)}`);
+    }
+    return { $type: "app.bsky.embed.external", external };
+  }
+
+  async uploadImage(imageUrl, maxBytes) {
+    const response = await this.fetch(imageUrl, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) throw new Error(`image HTTP ${response.status}`);
+    const type = (response.headers.get("content-type") || "").split(";", 1)[0].trim();
+    if (!type.startsWith("image/")) throw new Error(`not an image: ${type || "missing type"}`);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > maxBytes) throw new Error(`image exceeds ${maxBytes} bytes`);
+    const session = await this.authenticate();
+    const upload = await this.fetch(`${this.serviceUrl}/xrpc/com.atproto.repo.uploadBlob`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.accessJwt}`, "Content-Type": type },
+      body: bytes,
+    });
+    const payload = await upload.json().catch(() => null);
+    if (!upload.ok || !payload?.blob) throw new Error(`image upload failed: HTTP ${upload.status}`);
+    return payload.blob;
   }
 }
 
@@ -279,31 +380,16 @@ async function reconcileTelegram(post, current, store, client) {
 
 async function reconcileBluesky(post, current, store, client) {
   if (current?.status === "published") return { failed: false, receipt: current };
-  let root = current?.root;
   try {
-    if (!root) {
-      root = await client.publishRoot(post);
-      await store.save(receiptPath(post.path, "bluesky"), {
-        status: "partial",
-        root,
-        updated_at: new Date().toISOString(),
-      });
-    }
-    const link = await client.publishLink(post, root);
-    const receipt = {
-      status: "published",
-      published_at: new Date().toISOString(),
-      root,
-      link,
-    };
+    const published = await client.publish(post);
+    const receipt = { status: "published", published_at: new Date().toISOString(), post: published };
     await store.save(receiptPath(post.path, "bluesky"), receipt);
-    console.log(`Bluesky: ${post.path} -> ${root.url}`);
+    console.log(`Bluesky: ${post.path} -> ${published.url}`);
     return { failed: false, receipt };
   } catch (error) {
     const receipt = {
-      status: root ? "partial" : "failed",
+      status: "failed",
       attempted_at: new Date().toISOString(),
-      ...(root ? { root } : {}),
       error: sanitizedError(error),
     };
     await store.save(receiptPath(post.path, "bluesky"), receipt);
