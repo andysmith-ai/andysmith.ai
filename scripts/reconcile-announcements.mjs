@@ -76,6 +76,46 @@ function metaContent(html, key) {
   return "";
 }
 
+// A Markdown image or an HTML <img>; group 1 is everything up to the URL, group 2 the URL.
+const MARKDOWN_IMAGE_URL = /(!\[[^\]]*\]\(\s*<?)([^)\s>]+)/g;
+const HTML_IMAGE_URL = /(<img\b[^>]*\bsrc\s*=\s*["'])([^"']+)/gi;
+const MARKDOWN_IMAGE = /(!\[[^\]]*\]\([^)]*\))/;
+const FENCE = /^\s*(```|~~~)/;
+const LIST_OR_QUOTE = /^\s*([-*+]|\d+[.)]|>)\s/;
+
+// Backslash-escapes the ASCII punctuation that Telegram rich Markdown treats as syntax.
+function markdownText(value) {
+  return value.replace(/[\\`*_[\]<>#~|=$]/g, "\\$&");
+}
+
+/**
+ * Prepares a Post body for a rich message: image URLs become absolute, and an
+ * image sharing a line with text moves to its own paragraph, because rich
+ * messages accept media only as separate blocks. Fenced code, list items and
+ * quotes keep their lines.
+ */
+function mediaBlocks(markdown, baseUrl) {
+  const absolute = (_, prefix, src) => `${prefix}${new URL(src, baseUrl).href}`;
+  let fenced = false;
+  return markdown.split("\n").map((line) => {
+    if (FENCE.test(line)) fenced = !fenced;
+    if (fenced) return line;
+    const resolved = line.replace(MARKDOWN_IMAGE_URL, absolute).replace(HTML_IMAGE_URL, absolute);
+    if (!MARKDOWN_IMAGE.test(resolved) || LIST_OR_QUOTE.test(resolved)) return resolved;
+    return resolved.split(MARKDOWN_IMAGE).map((part) => part.trim()).filter(Boolean).join("\n\n");
+  }).join("\n");
+}
+
+/**
+ * The complete Post as Telegram rich Markdown: the title as a heading, a Link
+ * Post's external URL, the full body with images in place, and a footer link
+ * to the canonical URL.
+ */
+function telegramMarkdown(post) {
+  const footer = `<footer><a href="${htmlEscape(post.url)}">${htmlEscape(post.url.replace(/^https?:\/\//, ""))}</a></footer>`;
+  return [`# ${markdownText(post.title)}`, post.link, mediaBlocks(post.body, post.url), footer].filter(Boolean).join("\n\n");
+}
+
 function firstImage(body, baseUrl) {
   const match = /!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?[^)]*\)|<img\b[^>]*>/i.exec(body);
   if (!match) return undefined;
@@ -119,10 +159,10 @@ async function loadPost(root, relativePath, siteBaseUrl) {
     date,
     url,
     link,
+    body,
     // A link post's single preview slot belongs to its external link.
     image: link ? undefined : firstImage(body, url),
     announcements: {
-      telegram: typeof announcements.telegram === "string" ? announcements.telegram.trim() : "",
       bluesky: typeof announcements.bluesky === "string" ? announcements.bluesky.trim() : "",
     },
   };
@@ -204,28 +244,19 @@ class TelegramClient {
   }
 
   async publish(post) {
-    if (!post.announcements.telegram) throw new Error("Telegram announcement is missing");
-    const body = `${htmlEscape(post.announcements.telegram)}\n\n${htmlEscape(post.url)}`;
-    const text = post.link ? body : `<b>${htmlEscape(post.title)}</b>\n\n${body}`;
-    const response = await this.fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
+    const response = await this.fetch(`https://api.telegram.org/bot${this.token}/sendRichMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: this.chatId,
-        text,
-        parse_mode: "HTML",
+        rich_message: { markdown: telegramMarkdown(post) },
         disable_notification: true,
-        link_preview_options: post.link
-          ? { url: post.link, show_above_text: true }
-          : post.image
-            ? { url: post.image.url, prefer_large_media: true, show_above_text: false }
-            : { is_disabled: true },
       }),
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok || !payload?.ok || typeof payload.result?.message_id !== "number") {
       const description = typeof payload?.description === "string" ? payload.description : `HTTP ${response.status}`;
-      throw new Error(`Telegram rejected the announcement: ${description}`);
+      throw new Error(`Telegram rejected the post: ${description}`);
     }
     const messageId = payload.result.message_id;
     return {
