@@ -15,8 +15,8 @@ const post = {
   title: "Example <Post>",
   date: new Date("2026-09-22T12:00:00Z"),
   url: "https://andysmith.ai/2026/Sep/22/example/",
+  body: "Opening paragraph.",
   announcements: {
-    telegram: "Telegram <announcement>.",
     bluesky: "Bluesky announcement.",
   },
 };
@@ -70,43 +70,65 @@ function blueskyHarness(pages = {}) {
   return { client, records, uploads, requestUrls };
 }
 
-test("Telegram sends a regular announcement with its title and without a preview card", async () => {
-  const { client, requests } = telegramHarness();
+const footer = '<footer><a href="https://andysmith.ai/2026/Sep/22/example/">andysmith.ai/2026/Sep/22/example/</a></footer>';
 
-  const receipt = await client.publish(post);
+test("Telegram sends the full Post as a silent rich message with a heading and a footer link", async () => {
+  const { client, requests } = telegramHarness();
+  const full = {
+    ...post,
+    body: "Opening with **bold**.\n\n![photo](https://files.andysmith.ai/img/a/photo.png)\n\n- one\n- two",
+  };
+
+  const receipt = await client.publish(full);
 
   const [request] = requests;
-  assert.equal(request.url, "https://api.telegram.org/botsecret-token/sendMessage");
-  assert.equal(request.payload.parse_mode, "HTML");
-  assert.deepEqual(request.payload.link_preview_options, { is_disabled: true });
-  assert.match(request.payload.text, /^<b>Example &lt;Post&gt;<\/b>/);
-  assert.match(request.payload.text, /Telegram &lt;announcement&gt;\./);
-  assert.match(request.payload.text, /https:\/\/andysmith\.ai\/2026\/Sep\/22\/example\/$/);
+  assert.equal(request.url, "https://api.telegram.org/botsecret-token/sendRichMessage");
+  assert.equal(request.payload.chat_id, "@andysmith_ai");
+  assert.equal(request.payload.disable_notification, true);
+  assert.equal(request.payload.rich_message.markdown, [
+    "# Example \\<Post\\>",
+    "Opening with **bold**.",
+    "![photo](https://files.andysmith.ai/img/a/photo.png)",
+    "- one\n- two",
+    footer,
+  ].join("\n\n"));
   assert.equal(receipt.url, "https://t.me/andysmith_ai/42");
 });
 
-test("Telegram shows a link post's external preview above the text instead of a title", async () => {
+test("Telegram puts a Link Post's external URL under its title", async () => {
   const { client, requests } = telegramHarness();
 
-  await client.publish(linkPost);
+  await client.publish({ ...linkPost, body: "A comment." });
 
-  const [request] = requests;
-  assert.equal(request.payload.text, "Telegram &lt;announcement&gt;.\n\nhttps://andysmith.ai/2026/Sep/22/example/");
-  assert.deepEqual(request.payload.link_preview_options, { url: linkPost.link, show_above_text: true });
+  assert.equal(requests[0].payload.rich_message.markdown, [
+    "# Example \\<Post\\>",
+    "https://github.com/coldteadotai/pr-lens",
+    "A comment.",
+    footer,
+  ].join("\n\n"));
 });
 
-test("Telegram shows a regular post's image as a large preview below the text", async () => {
+test("Telegram resolves relative images and gives an inline image its own block, outside code", async () => {
   const { client, requests } = telegramHarness();
+  const body = [
+    "See ![shot](shot.png) here.",
+    "",
+    "```",
+    "![code](code.png) stays",
+    "```",
+    "",
+    "- item ![icon](icon.png)",
+  ].join("\n");
 
-  await client.publish(imagePost);
+  await client.publish({ ...post, body });
 
-  const [request] = requests;
-  assert.match(request.payload.text, /^<b>Example &lt;Post&gt;<\/b>/);
-  assert.deepEqual(request.payload.link_preview_options, {
-    url: imagePost.image.url,
-    prefer_large_media: true,
-    show_above_text: false,
-  });
+  assert.equal(requests[0].payload.rich_message.markdown, [
+    "# Example \\<Post\\>",
+    "See\n\n![shot](https://andysmith.ai/2026/Sep/22/example/shot.png)\n\nhere.",
+    "```\n![code](code.png) stays\n```",
+    "- item ![icon](https://andysmith.ai/2026/Sep/22/example/icon.png)",
+    footer,
+  ].join("\n\n"));
 });
 
 test("Bluesky publishes one post whose trailing arrow links to the site post", async () => {
@@ -229,7 +251,6 @@ test("reconciliation publishes only posts with announcement fields", async (t) =
     'title: "Example"',
     "date: 2026-09-22T12:00:00Z",
     "announcements:",
-    '  telegram: "Telegram announcement."',
     '  bluesky: "Bluesky announcement."',
     "---",
     "",
@@ -282,13 +303,13 @@ test("reconciliation publishes only posts with announcement fields", async (t) =
   ]);
 });
 
-test("reconciliation previews a post's first image but gives link posts their link instead", async (t) => {
+test("reconciliation sends each Post's full body to Telegram and previews its first image on Bluesky", async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), "announcement-reconciler-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const write = async (directory, frontmatter, body) => {
     await mkdir(path.join(root, directory), { recursive: true });
     await writeFile(path.join(root, directory, "index.md"), ["---", ...frontmatter, "announcements:",
-      '  telegram: "Announcement."', '  bluesky: "Announcement."', "---", "", body, ""].join("\n"));
+      '  bluesky: "Announcement."', "---", "", body, ""].join("\n"));
   };
   await write("src/2026/Sep/22/photo", ['title: "Photo"', "date: 2026-09-22T12:00:00Z"],
     '<a class="lightbox" href="https://files.andysmith.ai/img/a/photo.png"><img src="photo.webp" alt="A &amp; B"></a>\n\nText.');
@@ -334,10 +355,10 @@ test("reconciliation previews a post's first image but gives link posts their li
   });
 
   assert.deepEqual(result, { failed: false, candidates: 2 });
-  assert.deepEqual(telegramPayloads.map((payload) => payload.link_preview_options), [
-    { url: "https://andysmith.ai/2026/Sep/22/photo/photo.webp", prefer_large_media: true, show_above_text: false },
-    { url: "https://example.com/project", show_above_text: true },
-  ]);
+  const [photo, linked] = telegramPayloads.map((payload) => payload.rich_message.markdown);
+  assert.match(photo, /^# Photo\n\n<a class="lightbox" href="https:\/\/files\.andysmith\.ai\/img\/a\/photo\.png"><img src="https:\/\/andysmith\.ai\/2026\/Sep\/22\/photo\/photo\.webp"/);
+  assert.match(photo, /\n\nText\.\n\n<footer>/);
+  assert.match(linked, /^# Linked\n\nhttps:\/\/example\.com\/project\n\n!\[shot\]\(https:\/\/files\.andysmith\.ai\/img\/b\/shot\.png\)\n\nComment\./);
   assert.equal(blueskyRecords[0].embed.images[0].alt, "A & B");
   assert.equal(blueskyRecords[1].embed.$type, "app.bsky.embed.external");
   assert.ok(!requestedUrls.includes("https://files.andysmith.ai/img/b/shot.png"));

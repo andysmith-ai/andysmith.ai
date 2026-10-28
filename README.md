@@ -57,22 +57,23 @@ deployed github.io) for reference and is not part of the build.
 
 ## Announcement publishing
 
-New posts may include channel-specific announcement text:
+New posts may include a Bluesky-specific announcement:
 
 ```yaml
 announcements:
-  telegram: "Telegram-specific announcement."
   bluesky: "Bluesky-specific announcement."
 ```
 
 `.github/workflows/reconcile-announcements.yml` publishes eligible posts
 oldest-first:
 
-- Telegram, regular post: bold title, announcement, and the canonical URL. If
-  the post contains an image, the first one is shown as a large link preview
-  below the text; otherwise link previews are disabled.
-- Telegram, link post (`link` in frontmatter): the external link preview above
-  the text, the announcement, and the canonical URL. No title and no post image.
+- Telegram, regular post: the complete Post as one silent rich message
+  (`sendRichMessage` with Markdown): the title as a heading, the full body with
+  every image in place as a media block, and a footer linking to the canonical
+  URL. Image URLs are resolved against the Post URL, and an image that shares a
+  line with text is moved to its own block.
+- Telegram, link post (`link` in frontmatter): the same, with the external URL
+  under the title before the comment.
 - Bluesky: one post containing the announcement followed by `→`; the arrow
   links to the canonical URL, so the announcement plus ` →` must fit in 300
   characters. A regular post attaches its first image (up to 2,000,000 bytes,
@@ -140,8 +141,8 @@ store a public `https://t.me/<username>/<message-id>` URL.
 Open **Actions → Reconcile announcements → Run workflow**. The workflow should
 finish successfully. For an eligible Post, verify:
 
-1. Telegram contains the title, Telegram Announcement, and canonical URL with
-   no link preview.
+1. Telegram contains the title, the full Post with its images, and a footer
+   link to the canonical URL.
 2. Bluesky contains the Bluesky Announcement as the root post and a URL-only
    self-reply.
 3. The Post directory contains `telegram.json` and `bluesky.json` receipts on
