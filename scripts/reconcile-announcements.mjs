@@ -484,6 +484,7 @@ export {
   GitHubReceiptStore,
   TelegramClient,
   parseFrontmatter,
+  postPaths,
   publicPostUrl,
   receiptPath,
   reconcileBluesky,

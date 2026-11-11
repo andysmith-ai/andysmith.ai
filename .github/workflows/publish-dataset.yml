@@ -1,0 +1,50 @@
+name: Publish dataset
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write # GitHub OIDC token for the Hugging Face Trusted Publisher
+
+# Every run rebuilds the whole dataset, so only the newest run matters.
+concurrency:
+  group: dataset-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      # Trusted Publisher exchange: the GitHub OIDC token becomes a one-hour
+      # Hugging Face token scoped to the dataset repository.
+      # Explicit bash adds pipefail: a failed exchange stops the job here.
+      - name: Get a Hugging Face token
+        shell: bash
+        run: |
+          id_token=$(curl -sS --fail-with-body \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://huggingface.co" | jq -r .value)
+          hf_token=$(jq -n --arg token "$id_token" '{
+              grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+              subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
+              subject_token: $token,
+              resource: "datasets/andy-smith-ai/Posts"
+            }' | curl -sS --fail-with-body -H "Content-Type: application/json" --data @- \
+            https://huggingface.co/oauth/token | jq -r .access_token)
+          echo "::add-mask::$hf_token"
+          echo "HF_TOKEN=$hf_token" >> "$GITHUB_ENV"
+
+      - name: Rebuild andy-smith-ai/Posts
+        run: node scripts/build-dataset.mjs --publish

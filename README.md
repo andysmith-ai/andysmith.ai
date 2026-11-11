@@ -151,3 +151,26 @@ finish successfully. For an eligible Post, verify:
 The workflow processes every eligible unreceipted Post, not just the newest
 one. Configure both Channels before the first manual run.
 
+## Dataset publishing
+
+`.github/workflows/publish-dataset.yml` rebuilds the open Hugging Face dataset
+[`andy-smith-ai/Posts`](https://huggingface.co/datasets/andy-smith-ai/Posts)
+on every push to `main`. `scripts/build-dataset.mjs` regenerates the whole
+dataset from `src/` (one row per Post in `data/site.jsonl`, plus the card from
+`dataset/README.md`) and commits only the files that changed; an unchanged
+dataset produces no Hugging Face commit.
+
+Post bodies become portable Markdown: HTML images become Markdown images and
+relative URLs become absolute. `description`, `type`, `aliases`,
+`announcements`, and `twitter_discussion` are not exported.
+
+```sh
+nix develop -c npm run dataset   # build locally into _dataset/ without uploading
+```
+
+No Hugging Face secret is stored. The dataset's **Settings → Trusted
+Publishers** trusts GitHub Actions from `andysmith-ai/andysmith.ai`; the
+workflow exchanges its GitHub OIDC token for a one-hour token scoped to the
+dataset. After the first push, run **Actions → Publish dataset → Run
+workflow** once to publish the current posts. Locally, `--publish` needs
+`HF_TOKEN` set to a personal token with write access to the dataset.

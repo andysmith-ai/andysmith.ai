@@ -1,5 +1,6 @@
 node_modules/
 _site/
+_dataset/
 .DS_Store
 
 # reference clones of the old repos — not part of this site

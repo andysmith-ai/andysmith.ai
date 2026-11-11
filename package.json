@@ -9,9 +9,11 @@
     "clean": "rm -rf _site",
     "deploy": "npm run build && wrangler deploy",
     "preview": "npm run build && wrangler dev",
-    "test": "node --test scripts/*.test.mjs"
+    "test": "node --test scripts/*.test.mjs",
+    "dataset": "node scripts/build-dataset.mjs"
   },
   "dependencies": {
+    "@huggingface/hub": "^2.17.11",
     "yaml": "^2.8.1"
   },
   "devDependencies": {
