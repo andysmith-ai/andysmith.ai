@@ -1,5 +1,6 @@
 {
-  "status": "failed",
-  "attempted_at": "2026-11-11T12:04:55.034Z",
-  "error": "fetch failed"
+  "status": "published",
+  "published_at": "2026-11-12T05:47:05.190Z",
+  "message_id": 188,
+  "url": "https://t.me/andysmith_ai/188"
 }
