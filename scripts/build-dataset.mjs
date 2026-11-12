@@ -1,13 +1,46 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { downloadFile, uploadFiles } from "@huggingface/hub";
+import { commit, downloadFile, listFiles } from "@huggingface/hub";
+import { parquetWriteBuffer } from "hyparquet-writer";
 import { parseFrontmatter, postPaths, publicPostUrl } from "./reconcile-announcements.mjs";
 
 const SITE_BASE_URL = "https://andysmith.ai";
 const DATASET_REPO = { type: "dataset", name: "andy-smith-ai/Posts" };
 const CARD_SOURCE = "dataset/README.md";
 const LOCAL_OUT = "_dataset";
+
+const string = (name, repetition_type = "REQUIRED") => ({ name, type: "BYTE_ARRAY", converted_type: "UTF8", repetition_type });
+const list = (name, children) => [
+  { name, repetition_type: "REQUIRED", converted_type: "LIST", num_children: 1 },
+  { name: "list", repetition_type: "REPEATED", num_children: 1 },
+  ...children,
+];
+
+/** Parquet schema of one row; Arrow-style 3-level lists so every reader agrees on nesting. */
+const ROW_SCHEMA = [
+  { name: "schema", num_children: 9 },
+  string("id"),
+  string("platform"),
+  string("url"),
+  string("published_at"),
+  string("title", "OPTIONAL"),
+  string("text"),
+  string("link", "OPTIONAL"),
+  ...list("media", [
+    { name: "element", repetition_type: "REQUIRED", num_children: 3 },
+    string("type"),
+    string("url"),
+    string("text", "OPTIONAL"),
+  ]),
+  ...list("tags", [string("element")]),
+];
+const ROW_FIELDS = ["id", "platform", "url", "published_at", "title", "text", "link", "media", "tags"];
+
+function parquet(rows) {
+  const columnData = ROW_FIELDS.map((name) => ({ name, data: rows.map((row) => row[name]) }));
+  return new Uint8Array(parquetWriteBuffer({ columnData, schema: ROW_SCHEMA }));
+}
 
 // A lightbox wrapper around an image: keep only the image.
 const LIGHTBOX = /<a\b[^>]*>\s*(<img\b[^>]*>)\s*<\/a>/gi;
@@ -68,29 +101,37 @@ export async function buildDataset(root = process.cwd()) {
   const rows = await Promise.all((await postPaths(root)).map((postPath) => siteRow(root, postPath)));
   rows.sort((a, b) => a.published_at.localeCompare(b.published_at) || a.id.localeCompare(b.id));
   return {
-    "README.md": await readFile(path.join(root, CARD_SOURCE), "utf8"),
-    "data/site.jsonl": rows.map((row) => JSON.stringify(row)).join("\n") + "\n",
+    "README.md": new TextEncoder().encode(await readFile(path.join(root, CARD_SOURCE), "utf8")),
+    "data/site.parquet": parquet(rows),
   };
 }
 
-/** Uploads changed files in one commit; an unchanged dataset produces no commit. */
+/**
+ * Uploads changed files and deletes data files the build no longer produces, in one commit;
+ * an unchanged dataset produces no commit.
+ */
 async function publish(files, accessToken) {
-  const changed = [];
+  const operations = [];
   for (const [repoPath, content] of Object.entries(files)) {
     const current = await downloadFile({ repo: DATASET_REPO, path: repoPath, accessToken });
-    if (!current || (await current.text()) !== content) changed.push(repoPath);
+    if (!current || !Buffer.from(await current.arrayBuffer()).equals(content)) {
+      operations.push({ operation: "addOrUpdate", path: repoPath, content: new Blob([content]) });
+    }
   }
-  if (!changed.length) {
+  for await (const entry of listFiles({ repo: DATASET_REPO, path: "data", recursive: true, accessToken })) {
+    if (entry.type === "file" && !(entry.path in files)) operations.push({ operation: "delete", path: entry.path });
+  }
+  if (!operations.length) {
     console.log("dataset unchanged");
     return;
   }
-  await uploadFiles({
+  await commit({
     repo: DATASET_REPO,
     accessToken,
-    commitTitle: `Rebuild from andysmith.ai@${process.env.GITHUB_SHA?.slice(0, 7) ?? "local"}`,
-    files: changed.map((repoPath) => ({ path: repoPath, content: new Blob([files[repoPath]]) })),
+    title: `Rebuild from andysmith.ai@${process.env.GITHUB_SHA?.slice(0, 7) ?? "local"}`,
+    operations,
   });
-  console.log(`uploaded ${changed.join(", ")}`);
+  for (const { operation, path: repoPath } of operations) console.log(`${operation === "delete" ? "deleted" : "uploaded"} ${repoPath}`);
 }
 
 async function main() {

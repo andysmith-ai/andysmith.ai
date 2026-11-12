@@ -156,9 +156,10 @@ one. Configure both Channels before the first manual run.
 `.github/workflows/publish-dataset.yml` rebuilds the open Hugging Face dataset
 [`andy-smith-ai/Posts`](https://huggingface.co/datasets/andy-smith-ai/Posts)
 on every push to `main`. `scripts/build-dataset.mjs` regenerates the whole
-dataset from `src/` (one row per Post in `data/site.jsonl`, plus the card from
-`dataset/README.md`) and commits only the files that changed; an unchanged
-dataset produces no Hugging Face commit.
+dataset from `src/` (one row per Post in `data/site.parquet`, plus the card from
+`dataset/README.md`) and commits only the files that changed, deleting data
+files the build no longer produces; an unchanged dataset produces no Hugging
+Face commit.
 
 Post bodies become portable Markdown: HTML images become Markdown images and
 relative URLs become absolute. `description`, `type`, `aliases`,

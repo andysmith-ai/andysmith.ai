@@ -7,7 +7,7 @@ configs:
   - config_name: default
     data_files:
       - split: train
-        path: data/*.jsonl
+        path: data/*.parquet
 ---
 
 # Andy Smith — Posts
@@ -22,7 +22,7 @@ in this repository.
 
 | Platform | File | Status |
 | --- | --- | --- |
-| [andysmith.ai](https://andysmith.ai) | `data/site.jsonl` | complete, updated on every publish |
+| [andysmith.ai](https://andysmith.ai) | `data/site.parquet` | complete, updated on every publish |
 
 Social platforms will be added later.
 
